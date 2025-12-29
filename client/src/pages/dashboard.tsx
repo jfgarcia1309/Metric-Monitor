@@ -84,9 +84,10 @@ export default function Dashboard() {
     return () => clearInterval(timer);
   }, []);
 
-  // Datos por semana (simulado - cada semana tiene variación)
+  // Datos por semana (lee de localStorage si está disponible)
   const getWeeklyData = (week: number) => {
-    const baseData = [
+    const savedData = localStorage.getItem('gestores_data');
+    const baseData = savedData ? JSON.parse(savedData) : [
       { nombre: "Monica Andrea Perez Pardo", renovaciones: 195, calidad: 84, atrasos: 1.2, llamadas: 52, conectividad: 68 },
       { nombre: "Leidy Yolima Castro Rojas", renovaciones: 188, calidad: 82, atrasos: 1.5, llamadas: 48, conectividad: 65 },
       { nombre: "Laura Alejandra Cañas Prieto", renovaciones: 192, calidad: 86, atrasos: 0.8, llamadas: 55, conectividad: 72 },
@@ -112,22 +113,23 @@ export default function Dashboard() {
       { nombre: "Leidy Juliana Santander Roa", renovaciones: 186, calidad: 80, atrasos: 1.8, llamadas: 46, conectividad: 62 }
     ];
 
-    // Variación semanal realista
-    const variations = [
-      { factor: 0.85, calidad: -3 }, // Semana 1: más baja
-      { factor: 0.90, calidad: -1 },  // Semana 2: mejora
-      { factor: 0.95, calidad: 1 },   // Semana 3: bien
-      { factor: 1.0, calidad: 2 }     // Semana 4: mejor
-    ];
-
-    const v = variations[week - 1] || variations[3];
-    
-    return baseData.map(g => ({
-      ...g,
-      renovaciones: Math.round(g.renovaciones * v.factor),
-      calidad: Math.min(g.calidad + v.calidad, 95),
-      atrasos: Math.max(g.atrasos + (v.factor < 1 ? 0.3 : -0.1), 0.2)
-    }));
+    // Variación semanal realista (solo si no hay datos personalizados)
+    if (!savedData) {
+      const variations = [
+        { factor: 0.85, calidad: -3 },
+        { factor: 0.90, calidad: -1 },
+        { factor: 0.95, calidad: 1 },
+        { factor: 1.0, calidad: 2 }
+      ];
+      const v = variations[week - 1] || variations[3];
+      return baseData.map((g) => ({
+        ...g,
+        renovaciones: Math.round((g as Gestor).renovaciones * v.factor),
+        calidad: Math.min((g as Gestor).calidad + v.calidad, 95),
+        atrasos: Math.max((g as Gestor).atrasos + (v.factor < 1 ? 0.3 : -0.1), 0.2)
+      }));
+    }
+    return baseData;
   };
 
   const handleExport = () => {
@@ -146,10 +148,10 @@ export default function Dashboard() {
   const gestores = getWeeklyData(currentWeek);
 
   const meta = 180;
-  const totalRenovaciones = gestores.reduce((sum, g) => sum + g.renovaciones, 0);
-  const promedioCalidad = (gestores.reduce((sum, g) => sum + g.calidad, 0) / gestores.length).toFixed(1);
-  const promedioAtrasos = (gestores.reduce((sum, g) => sum + g.atrasos, 0) / gestores.length).toFixed(2);
-  const promedioLlamadas = Math.round(gestores.reduce((sum, g) => sum + g.llamadas, 0) / gestores.length);
+  const totalRenovaciones = gestores.reduce((sum: number, g: Gestor) => sum + g.renovaciones, 0);
+  const promedioCalidad = (gestores.reduce((sum: number, g: Gestor) => sum + g.calidad, 0) / gestores.length).toFixed(1);
+  const promedioAtrasos = (gestores.reduce((sum: number, g: Gestor) => sum + g.atrasos, 0) / gestores.length).toFixed(2);
+  const promedioLlamadas = Math.round(gestores.reduce((sum: number, g: Gestor) => sum + g.llamadas, 0) / gestores.length);
   const metaTotal = meta * gestores.length;
   
   // Top performers
@@ -192,7 +194,7 @@ export default function Dashboard() {
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex gap-1 bg-muted rounded-lg p-1">
-              {[1, 2, 3, 4].map(w => (
+              {[1, 2, 3, 4].map((w: number) => (
                 <Button
                   key={w}
                   variant={currentWeek === w ? "default" : "ghost"}
@@ -268,7 +270,7 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent className="relative z-10">
-              {sortedByRenovaciones.slice(0, 3).map((gestor, i) => (
+              {sortedByRenovaciones.slice(0, 3).map((gestor: Gestor, i: number) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, x: -20 }}
@@ -306,7 +308,7 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardContent className="relative z-10">
-              {sortedByRenovaciones.slice(-3).reverse().map((gestor, i) => (
+              {sortedByRenovaciones.slice(-3).reverse().map((gestor: Gestor, i: number) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, x: 20 }}
@@ -521,7 +523,7 @@ export default function Dashboard() {
                 <CardDescription>Top 5 Calidad este mes</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {gestores.sort((a, b) => b.calidad - a.calidad).slice(0, 5).map((gestor, i) => (
+                {gestores.sort((a: Gestor, b: Gestor) => b.calidad - a.calidad).slice(0, 5).map((gestor: Gestor, i: number) => (
                   <div key={i} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-bold text-muted-foreground w-4">{i + 1}</span>
