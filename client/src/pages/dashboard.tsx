@@ -14,7 +14,8 @@ import {
   CheckCircle,
   AlertCircle,
   Zap,
-  AlertTriangle
+  AlertTriangle,
+  Settings
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -22,6 +23,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 import {
   Table,
   TableBody,
@@ -77,7 +79,8 @@ const CircularProgress = ({ value, max, label, color, sublabel }: { value: numbe
 export default function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showAllGestores, setShowAllGestores] = useState(false);
-  const [currentWeek, setCurrentWeek] = useState(4); // Semana actual (4)
+  const [currentWeek, setCurrentWeek] = useState(4);
+  const [, navigate] = useLocation();
   
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -177,6 +180,16 @@ export default function Dashboard() {
               <span className="text-sm font-medium">{currentTime.toLocaleTimeString('es-CO')}</span>
               <span className="text-xs text-muted-foreground">{currentTime.toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
             </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => navigate('/admin')}
+              className="hidden md:flex"
+              data-testid="button-admin-panel"
+            >
+              <Settings className="mr-2 h-4 w-4" />
+              Admin
+            </Button>
             <Avatar className="h-9 w-9 border-2 border-primary/20">
               <AvatarImage src="https://github.com/shadcn.png" />
               <AvatarFallback>AD</AvatarFallback>

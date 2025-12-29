@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Save, Plus, Trash2, DownloadCloud, Lock } from 'lucide-react';
+import { Upload, Save, Plus, Trash2, DownloadCloud, Lock, ChevronLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from 'sonner';
+import { useLocation } from 'wouter';
 
 interface Gestor {
   nombre: string;
@@ -53,6 +54,15 @@ export default function AdminPanel() {
   const [gestores, setGestores] = useState<Gestor[]>(DEFAULT_GESTORES);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editValues, setEditValues] = useState<Gestor | null>(null);
+  const [, navigate] = useLocation();
+  const [newGestor, setNewGestor] = useState<Gestor>({
+    nombre: '',
+    renovaciones: 0,
+    calidad: 0,
+    atrasos: 0,
+    llamadas: 0,
+    conectividad: 70
+  });
 
   useEffect(() => {
     const saved = localStorage.getItem('gestores_data');
@@ -130,6 +140,16 @@ export default function AdminPanel() {
     toast.success('Gestor eliminado');
   };
 
+  const handleAddGestor = () => {
+    if (!newGestor.nombre) {
+      toast.error('El nombre es requerido');
+      return;
+    }
+    setGestores([...gestores, newGestor]);
+    setNewGestor({ nombre: '', renovaciones: 0, calidad: 0, atrasos: 0, llamadas: 0, conectividad: 70 });
+    toast.success('✅ Gestor añadido');
+  };
+
   const handleDownloadTemplate = () => {
     const csv = [
       ['Gestor', 'Renovaciones', 'Calidad', 'Atrasos', 'Llamadas'].join(','),
@@ -148,27 +168,76 @@ export default function AdminPanel() {
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => navigate('/')}
+            >
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Volver
+            </Button>
             <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center">
               <Lock className="w-5 h-5 text-white" />
             </div>
             <h1 className="text-xl font-bold">Admin - Gestión de Datos</h1>
           </div>
-          <Badge variant="destructive">Solo Admin</Badge>
+          <Badge variant="destructive">🔐 Solo Admin</Badge>
         </div>
       </header>
 
       <main className="container mx-auto px-6 py-8 space-y-6">
+        {/* Opciones Rápidas */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Plus className="w-5 h-5 text-green-600" />
+                Opción 1
+              </CardTitle>
+              <CardDescription>Agregar Manual</CardDescription>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              Completa el formulario abajo y haz clic en "Agregar Gestor"
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Upload className="w-5 h-5 text-blue-600" />
+                Opción 2
+              </CardTitle>
+              <CardDescription>Importar CSV</CardDescription>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              Carga un archivo CSV con todos los datos de una vez
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <DownloadCloud className="w-5 h-5 text-purple-600" />
+                Opción 3
+              </CardTitle>
+              <CardDescription>Descargar Template</CardDescription>
+            </CardHeader>
+            <CardContent className="text-sm text-muted-foreground">
+              Obtén el formato correcto para el CSV
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Acciones Rápidas */}
-        <Card>
+        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
           <CardHeader>
             <CardTitle>Importar / Exportar Datos</CardTitle>
-            <CardDescription>Carga un CSV o descarga el template actual</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">
             <Button asChild className="cursor-pointer">
               <label className="cursor-pointer">
                 <Upload className="mr-2 h-4 w-4" />
-                Importar CSV
+                📤 Importar CSV
                 <input
                   type="file"
                   accept=".csv"
@@ -180,12 +249,72 @@ export default function AdminPanel() {
             </Button>
             <Button variant="outline" onClick={handleDownloadTemplate} data-testid="button-download-template">
               <DownloadCloud className="mr-2 h-4 w-4" />
-              Descargar Template
+              📥 Descargar Template
             </Button>
-            <Button onClick={handleSave} className="ml-auto" data-testid="button-save-data">
+            <Button onClick={handleSave} className="ml-auto bg-green-600 hover:bg-green-700" data-testid="button-save-data">
               <Save className="mr-2 h-4 w-4" />
-              Guardar Cambios
+              ✅ Guardar Cambios
             </Button>
+          </CardContent>
+        </Card>
+
+        {/* Agregar Nuevo Gestor */}
+        <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+          <CardHeader>
+            <CardTitle>➕ Agregar Nuevo Gestor</CardTitle>
+            <CardDescription>Completa los datos y haz clic en "Agregar"</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+              <div>
+                <label className="text-sm font-medium">Nombre</label>
+                <Input
+                  placeholder="Ej: Juan Pérez"
+                  value={newGestor.nombre}
+                  onChange={(e) => setNewGestor({ ...newGestor, nombre: e.target.value })}
+                  data-testid="input-new-nombre"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Renovaciones</label>
+                <Input
+                  type="number"
+                  placeholder="Ej: 190"
+                  value={newGestor.renovaciones}
+                  onChange={(e) => setNewGestor({ ...newGestor, renovaciones: parseInt(e.target.value) })}
+                  data-testid="input-new-renovaciones"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Calidad %</label>
+                <Input
+                  type="number"
+                  placeholder="Ej: 85"
+                  value={newGestor.calidad}
+                  onChange={(e) => setNewGestor({ ...newGestor, calidad: parseInt(e.target.value) })}
+                  data-testid="input-new-calidad"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Atrasos %</label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  placeholder="Ej: 1.5"
+                  value={newGestor.atrasos}
+                  onChange={(e) => setNewGestor({ ...newGestor, atrasos: parseFloat(e.target.value) })}
+                  data-testid="input-new-atrasos"
+                />
+              </div>
+              <Button 
+                onClick={handleAddGestor}
+                className="bg-green-600 hover:bg-green-700"
+                data-testid="button-add-gestor"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Agregar
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
@@ -298,16 +427,51 @@ export default function AdminPanel() {
         </Card>
 
         {/* Info */}
-        <Card className="bg-blue-50 border-blue-200">
-          <CardContent className="pt-6">
-            <p className="text-sm text-muted-foreground">
-              💾 Los cambios se guardan en localStorage (navegador). Haz clic en <strong>"Guardar Cambios"</strong> después de editar.
-            </p>
-            <p className="text-xs text-muted-foreground mt-2">
-              📋 Formato CSV esperado: Gestor,Renovaciones,Calidad,Atrasos,Llamadas
-            </p>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="bg-blue-50 border-blue-200">
+            <CardHeader>
+              <CardTitle className="text-lg">📋 Instrucciones</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3 text-sm">
+              <div>
+                <p className="font-semibold text-foreground">1️⃣ Agregar Manual:</p>
+                <p className="text-muted-foreground">Completa el formulario verde arriba y haz clic en "Agregar"</p>
+              </div>
+              <div>
+                <p className="font-semibold text-foreground">2️⃣ Importar CSV:</p>
+                <p className="text-muted-foreground">Haz clic en "Importar CSV" y selecciona tu archivo</p>
+              </div>
+              <div>
+                <p className="font-semibold text-foreground">3️⃣ Editar Existentes:</p>
+                <p className="text-muted-foreground">Haz clic en "Editar" en cualquier fila</p>
+              </div>
+              <div>
+                <p className="font-semibold text-foreground">4️⃣ Guardar:</p>
+                <p className="text-muted-foreground">Haz clic en <strong>"Guardar Cambios"</strong> (botón verde)</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-amber-50 border-amber-200">
+            <CardHeader>
+              <CardTitle className="text-lg">📄 Formato CSV</CardTitle>
+            </CardHeader>
+            <CardContent className="text-sm space-y-2">
+              <p className="font-mono bg-white p-2 rounded border text-xs">
+                Gestor,Renovaciones,Calidad,Atrasos,Llamadas
+              </p>
+              <p className="font-mono bg-white p-2 rounded border text-xs">
+                Monica Perez,195,84,1.2,52
+              </p>
+              <p className="font-mono bg-white p-2 rounded border text-xs">
+                Juan Gomez,188,82,1.5,48
+              </p>
+              <p className="text-xs text-muted-foreground mt-3">
+                💾 Los cambios se guardan en tu navegador. <strong>Esos datos aparecen en el dashboard</strong> cuando regreses a la página principal.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </main>
     </div>
   );
