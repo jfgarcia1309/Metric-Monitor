@@ -10,6 +10,8 @@ export interface IStorage {
   getManagers(): Promise<Manager[]>;
   getManagersByWeek(week: number): Promise<Manager[]>;
   createManager(manager: InsertManager): Promise<Manager>;
+  updateManager(id: string, manager: Partial<InsertManager>): Promise<Manager>;
+  deleteManager(id: string): Promise<void>;
 }
 
 export class MemStorage implements IStorage {
@@ -51,6 +53,18 @@ export class MemStorage implements IStorage {
     const manager: Manager = { ...insertManager, id };
     this.managers.set(id, manager);
     return manager;
+  }
+
+  async updateManager(id: string, update: Partial<InsertManager>): Promise<Manager> {
+    const existing = this.managers.get(id);
+    if (!existing) throw new Error("Manager not found");
+    const updated = { ...existing, ...update };
+    this.managers.set(id, updated);
+    return updated;
+  }
+
+  async deleteManager(id: string): Promise<void> {
+    this.managers.delete(id);
   }
 }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Upload, Save, Plus, Trash2, DownloadCloud, Lock, ChevronLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,71 +14,90 @@ import {
 } from "@/components/ui/table";
 import { toast } from 'sonner';
 import { useLocation } from 'wouter';
-
-interface Gestor {
-  nombre: string;
-  renovaciones: number;
-  calidad: number;
-  atrasos: number;
-  llamadas: number;
-  conectividad: number;
-}
-
-const DEFAULT_GESTORES: Gestor[] = [
-  { nombre: "Monica Andrea Perez Pardo", renovaciones: 195, calidad: 84, atrasos: 1.2, llamadas: 52, conectividad: 68 },
-  { nombre: "Leidy Yolima Castro Rojas", renovaciones: 188, calidad: 82, atrasos: 1.5, llamadas: 48, conectividad: 65 },
-  { nombre: "Laura Alejandra Cañas Prieto", renovaciones: 192, calidad: 86, atrasos: 0.8, llamadas: 55, conectividad: 72 },
-  { nombre: "Tatiana Paola Rosas Munevar", renovaciones: 185, calidad: 81, atrasos: 1.8, llamadas: 42, conectividad: 58 },
-  { nombre: "Lina Tatiana Bogota Murcia", renovaciones: 191, calidad: 83, atrasos: 1.3, llamadas: 50, conectividad: 67 },
-  { nombre: "Ingrid Marcela Peña Buitrago", renovaciones: 186, calidad: 80, atrasos: 1.9, llamadas: 46, conectividad: 62 },
-  { nombre: "Fernanda Romero Saenz", renovaciones: 194, calidad: 85, atrasos: 0.9, llamadas: 53, conectividad: 70 },
-  { nombre: "Andrea Lievano Gomez", renovaciones: 182, calidad: 79, atrasos: 1.7, llamadas: 44, conectividad: 60 },
-  { nombre: "Luz Mary Pinto Alarcon", renovaciones: 198, calidad: 88, atrasos: 0.5, llamadas: 58, conectividad: 75 },
-  { nombre: "Gloria Estefani Gomez Plata", renovaciones: 180, calidad: 78, atrasos: 1.9, llamadas: 40, conectividad: 55 },
-  { nombre: "Monica Alexandra Rey Munevar", renovaciones: 189, calidad: 82, atrasos: 1.4, llamadas: 49, conectividad: 66 },
-  { nombre: "Maria Elena Vanegas Silguero", renovaciones: 196, calidad: 87, atrasos: 0.7, llamadas: 54, conectividad: 71 },
-  { nombre: "Yina Sanchez Roa", renovaciones: 187, calidad: 81, atrasos: 1.6, llamadas: 47, conectividad: 63 },
-  { nombre: "Manuel David Casas Orjuela", renovaciones: 190, calidad: 84, atrasos: 1.1, llamadas: 51, conectividad: 68 },
-  { nombre: "Juan David Perez Moreno", renovaciones: 183, calidad: 80, atrasos: 1.8, llamadas: 43, conectividad: 59 },
-  { nombre: "Angelica Natalia Rodriguez Prieto", renovaciones: 199, calidad: 89, atrasos: 0.4, llamadas: 56, conectividad: 74 },
-  { nombre: "Jessica Tatiana Valderrama Roa", renovaciones: 184, calidad: 81, atrasos: 1.7, llamadas: 45, conectividad: 61 },
-  { nombre: "Daniela Ramirez Pacheco", renovaciones: 188, calidad: 83, atrasos: 1.2, llamadas: 50, conectividad: 67 },
-  { nombre: "John Erick Jaramillo Correa", renovaciones: 181, calidad: 79, atrasos: 1.9, llamadas: 41, conectividad: 56 },
-  { nombre: "Karolina Arboleda Rios", renovaciones: 197, calidad: 86, atrasos: 0.6, llamadas: 57, conectividad: 73 },
-  { nombre: "Alisson Mora Benavidez", renovaciones: 189, calidad: 82, atrasos: 1.4, llamadas: 48, conectividad: 65 },
-  { nombre: "Paula Andrea Gomez Bernal", renovaciones: 193, calidad: 84, atrasos: 1.0, llamadas: 52, conectividad: 69 },
-  { nombre: "Leidy Juliana Santander Roa", renovaciones: 186, calidad: 80, atrasos: 1.8, llamadas: 46, conectividad: 62 }
-];
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiRequest, queryClient } from '@/lib/queryClient';
+import { Manager, InsertManager } from '@shared/schema';
 
 export default function AdminPanel() {
-  const [gestores, setGestores] = useState<Gestor[]>(DEFAULT_GESTORES);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editValues, setEditValues] = useState<Gestor | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [password, setPassword] = useState('');
+  const [currentWeek, setCurrentWeek] = useState(4);
   const [, navigate] = useLocation();
-  const [newGestor, setNewGestor] = useState<Gestor>({
+
+  const [gestoresList, setGestoresList] = useState<Manager[]>([]);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editValues, setEditValues] = useState<Manager | null>(null);
+
+  const { data: managers = [] } = useQuery<Manager[]>({
+    queryKey: ['/api/managers/week', currentWeek],
+    queryFn: async () => {
+      const res = await fetch(`/api/managers/week/${currentWeek}`);
+      if (!res.ok) throw new Error('Failed to fetch');
+      return res.json();
+    }
+  });
+
+  const mutation = useMutation({
+    mutationFn: async (newManager: InsertManager) => {
+      const res = await apiRequest('POST', '/api/managers', newManager, {
+        headers: { 'x-admin-password': password }
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/managers/week', currentWeek] });
+      toast.success('✅ Gestor añadido exitosamente');
+    },
+    onError: () => {
+      toast.error('Error al añadir gestor. Verifica la contraseña.');
+    }
+  });
+
+  const [newGestor, setNewGestor] = useState<InsertManager>({
     nombre: '',
     renovaciones: 0,
     calidad: 0,
     atrasos: 0,
     llamadas: 0,
-    conectividad: 70
+    conectividad: 70,
+    semana: currentWeek
   });
 
-  useEffect(() => {
-    const saved = localStorage.getItem('gestores_data');
-    if (saved) {
-      try {
-        setGestores(JSON.parse(saved));
-        toast.success('Datos cargados desde localStorage');
-      } catch (e) {
-        toast.error('Error al cargar datos');
-      }
+  const handleLogin = () => {
+    if (password === 'admin123') {
+      setIsAdmin(true);
+      toast.success('Acceso concedido');
+    } else {
+      toast.error('Contraseña incorrecta');
     }
-  }, []);
+  };
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle>Acceso Administrativo</CardTitle>
+            <CardDescription>Ingresa la contraseña para continuar</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Input 
+              type="password" 
+              placeholder="Contraseña" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleLogin()}
+            />
+            <Button className="w-full" onClick={handleLogin}>Entrar</Button>
+            <Button variant="ghost" className="w-full" onClick={() => navigate('/')}>Volver al Dashboard</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   const handleSave = () => {
-    localStorage.setItem('gestores_data', JSON.stringify(gestores));
-    toast.success('✅ Datos guardados exitosamente');
+    toast.success('✅ Los datos se guardan automáticamente en el servidor');
   };
 
   const handleCSVImport = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,29 +105,33 @@ export default function AdminPanel() {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const csv = event.target?.result as string;
         const lines = csv.split('\n').filter(l => l.trim());
-        const data: Gestor[] = [];
-
+        
+        let count = 0;
         for (let i = 1; i < lines.length; i++) {
           const [nombre, renovaciones, calidad, atrasos, llamadas] = lines[i].split(',').map(v => v.trim());
           if (nombre) {
-            data.push({
+            await apiRequest('POST', '/api/managers', {
               nombre,
               renovaciones: parseInt(renovaciones) || 0,
               calidad: parseInt(calidad) || 0,
               atrasos: parseFloat(atrasos) || 0,
               llamadas: parseInt(llamadas) || 0,
-              conectividad: 70
+              conectividad: 70,
+              semana: currentWeek
+            }, {
+              headers: { 'x-admin-password': password }
             });
+            count++;
           }
         }
 
-        if (data.length > 0) {
-          setGestores(data);
-          toast.success(`✅ Importados ${data.length} gestores`);
+        if (count > 0) {
+          queryClient.invalidateQueries({ queryKey: ['/api/managers/week', currentWeek] });
+          toast.success(`✅ Importados ${count} gestores`);
         } else {
           toast.error('No se encontraron datos válidos');
         }
@@ -121,23 +144,36 @@ export default function AdminPanel() {
 
   const handleEdit = (index: number) => {
     setEditingIndex(index);
-    setEditValues({ ...gestores[index] });
+    setEditValues({ ...managers[index] });
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (editingIndex !== null && editValues) {
-      const updated = [...gestores];
-      updated[editingIndex] = editValues;
-      setGestores(updated);
-      setEditingIndex(null);
-      setEditValues(null);
-      toast.success('Gestor actualizado');
+      try {
+        await apiRequest('PATCH', `/api/managers/${editValues.id}`, editValues, {
+          headers: { 'x-admin-password': password }
+        });
+        queryClient.invalidateQueries({ queryKey: ['/api/managers/week', currentWeek] });
+        setEditingIndex(null);
+        setEditValues(null);
+        toast.success('Gestor actualizado');
+      } catch (e) {
+        toast.error('Error al actualizar');
+      }
     }
   };
 
-  const handleDelete = (index: number) => {
-    setGestores(gestores.filter((_, i) => i !== index));
-    toast.success('Gestor eliminado');
+  const handleDelete = async (index: number) => {
+    const gestor = managers[index];
+    try {
+      await apiRequest('DELETE', `/api/managers/${gestor.id}`, undefined, {
+        headers: { 'x-admin-password': password }
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/managers/week', currentWeek] });
+      toast.success('Gestor eliminado');
+    } catch (e) {
+      toast.error('Error al eliminar');
+    }
   };
 
   const handleAddGestor = () => {
@@ -145,15 +181,14 @@ export default function AdminPanel() {
       toast.error('El nombre es requerido');
       return;
     }
-    setGestores([...gestores, newGestor]);
-    setNewGestor({ nombre: '', renovaciones: 0, calidad: 0, atrasos: 0, llamadas: 0, conectividad: 70 });
-    toast.success('✅ Gestor añadido');
+    mutation.mutate({ ...newGestor, semana: currentWeek });
+    setNewGestor({ nombre: '', renovaciones: 0, calidad: 0, atrasos: 0, llamadas: 0, conectividad: 70, semana: currentWeek });
   };
 
   const handleDownloadTemplate = () => {
     const csv = [
       ['Gestor', 'Renovaciones', 'Calidad', 'Atrasos', 'Llamadas'].join(','),
-      ...gestores.map(g => [g.nombre, g.renovaciones, g.calidad, g.atrasos, g.llamadas].join(','))
+      ...managers.map(g => [g.nombre, g.renovaciones, g.calidad, g.atrasos, g.llamadas].join(','))
     ].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -186,6 +221,17 @@ export default function AdminPanel() {
       </header>
 
       <main className="container mx-auto px-6 py-8 space-y-6">
+        <div className="flex justify-center gap-2 mb-6">
+          {[1, 2, 3, 4].map(w => (
+            <Button 
+              key={w}
+              variant={currentWeek === w ? "default" : "outline"}
+              onClick={() => setCurrentWeek(w)}
+            >
+              Semana {w}
+            </Button>
+          ))}
+        </div>
         {/* Opciones Rápidas */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
@@ -338,8 +384,8 @@ export default function AdminPanel() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {gestores.map((gestor, idx) => (
-                    <TableRow key={idx}>
+                  {managers.map((gestor, idx) => (
+                    <TableRow key={gestor.id}>
                       {editingIndex === idx && editValues ? (
                         <>
                           <TableCell>

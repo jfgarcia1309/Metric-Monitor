@@ -24,6 +24,8 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
+import { Manager } from "@shared/schema";
+import { useQuery } from "@tanstack/react-query";
 import {
   Table,
   TableBody,
@@ -81,86 +83,35 @@ export default function Dashboard() {
   const [showAllGestores, setShowAllGestores] = useState(false);
   const [currentWeek, setCurrentWeek] = useState(4);
   const [, navigate] = useLocation();
-  
+
+  // Fetch managers from API
+  const { data: managers = [], isLoading } = useQuery<Manager[]>({
+    queryKey: ['/api/managers/week', currentWeek],
+    queryFn: async () => {
+      const res = await fetch(`/api/managers/week/${currentWeek}`);
+      if (!res.ok) throw new Error('Failed to fetch managers');
+      return res.json();
+    }
+  });
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Datos por semana (lee de localStorage si está disponible)
-  const getWeeklyData = (week: number) => {
-    const savedData = localStorage.getItem('gestores_data');
-    const baseData = savedData ? JSON.parse(savedData) : [
-      { nombre: "Monica Andrea Perez Pardo", renovaciones: 195, calidad: 84, atrasos: 1.2, llamadas: 52, conectividad: 68 },
-      { nombre: "Leidy Yolima Castro Rojas", renovaciones: 188, calidad: 82, atrasos: 1.5, llamadas: 48, conectividad: 65 },
-      { nombre: "Laura Alejandra Cañas Prieto", renovaciones: 192, calidad: 86, atrasos: 0.8, llamadas: 55, conectividad: 72 },
-      { nombre: "Tatiana Paola Rosas Munevar", renovaciones: 185, calidad: 81, atrasos: 1.8, llamadas: 42, conectividad: 58 },
-      { nombre: "Lina Tatiana Bogota Murcia", renovaciones: 191, calidad: 83, atrasos: 1.3, llamadas: 50, conectividad: 67 },
-      { nombre: "Ingrid Marcela Peña Buitrago", renovaciones: 186, calidad: 80, atrasos: 1.9, llamadas: 46, conectividad: 62 },
-      { nombre: "Fernanda Romero Saenz", renovaciones: 194, calidad: 85, atrasos: 0.9, llamadas: 53, conectividad: 70 },
-      { nombre: "Andrea Lievano Gomez", renovaciones: 182, calidad: 79, atrasos: 1.7, llamadas: 44, conectividad: 60 },
-      { nombre: "Luz Mary Pinto Alarcon", renovaciones: 198, calidad: 88, atrasos: 0.5, llamadas: 58, conectividad: 75 },
-      { nombre: "Gloria Estefani Gomez Plata", renovaciones: 180, calidad: 78, atrasos: 1.9, llamadas: 40, conectividad: 55 },
-      { nombre: "Monica Alexandra Rey Munevar", renovaciones: 189, calidad: 82, atrasos: 1.4, llamadas: 49, conectividad: 66 },
-      { nombre: "Maria Elena Vanegas Silguero", renovaciones: 196, calidad: 87, atrasos: 0.7, llamadas: 54, conectividad: 71 },
-      { nombre: "Yina Sanchez Roa", renovaciones: 187, calidad: 81, atrasos: 1.6, llamadas: 47, conectividad: 63 },
-      { nombre: "Manuel David Casas Orjuela", renovaciones: 190, calidad: 84, atrasos: 1.1, llamadas: 51, conectividad: 68 },
-      { nombre: "Juan David Perez Moreno", renovaciones: 183, calidad: 80, atrasos: 1.8, llamadas: 43, conectividad: 59 },
-      { nombre: "Angelica Natalia Rodriguez Prieto", renovaciones: 199, calidad: 89, atrasos: 0.4, llamadas: 56, conectividad: 74 },
-      { nombre: "Jessica Tatiana Valderrama Roa", renovaciones: 184, calidad: 81, atrasos: 1.7, llamadas: 45, conectividad: 61 },
-      { nombre: "Daniela Ramirez Pacheco", renovaciones: 188, calidad: 83, atrasos: 1.2, llamadas: 50, conectividad: 67 },
-      { nombre: "John Erick Jaramillo Correa", renovaciones: 181, calidad: 79, atrasos: 1.9, llamadas: 41, conectividad: 56 },
-      { nombre: "Karolina Arboleda Rios", renovaciones: 197, calidad: 86, atrasos: 0.6, llamadas: 57, conectividad: 73 },
-      { nombre: "Alisson Mora Benavidez", renovaciones: 189, calidad: 82, atrasos: 1.4, llamadas: 48, conectividad: 65 },
-      { nombre: "Paula Andrea Gomez Bernal", renovaciones: 193, calidad: 84, atrasos: 1.0, llamadas: 52, conectividad: 69 },
-      { nombre: "Leidy Juliana Santander Roa", renovaciones: 186, calidad: 80, atrasos: 1.8, llamadas: 46, conectividad: 62 }
-    ];
-
-    // Variación semanal realista (solo si no hay datos personalizados)
-    if (!savedData) {
-      const variations = [
-        { factor: 0.85, calidad: -3 },
-        { factor: 0.90, calidad: -1 },
-        { factor: 0.95, calidad: 1 },
-        { factor: 1.0, calidad: 2 }
-      ];
-      const v = variations[week - 1] || variations[3];
-      return baseData.map((g) => ({
-        ...g,
-        renovaciones: Math.round((g as Gestor).renovaciones * v.factor),
-        calidad: Math.min((g as Gestor).calidad + v.calidad, 95),
-        atrasos: Math.max((g as Gestor).atrasos + (v.factor < 1 ? 0.3 : -0.1), 0.2)
-      }));
-    }
-    return baseData;
-  };
-
-  const handleExport = () => {
-    const csv = [
-      ['Gestor', 'Renovaciones', 'Calidad', 'Atrasos', 'Llamadas'].join(','),
-      ...gestores.map(g => [g.nombre, g.renovaciones, g.calidad, g.atrasos, g.llamadas].join(','))
-    ].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `renovaciones-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-  };
-
-  const gestores = getWeeklyData(currentWeek);
+  const gestores = managers;
 
   const meta = 180;
-  const totalRenovaciones = gestores.reduce((sum: number, g: Gestor) => sum + g.renovaciones, 0);
-  const promedioCalidad = (gestores.reduce((sum: number, g: Gestor) => sum + g.calidad, 0) / gestores.length).toFixed(1);
-  const promedioAtrasos = (gestores.reduce((sum: number, g: Gestor) => sum + g.atrasos, 0) / gestores.length).toFixed(2);
-  const promedioLlamadas = Math.round(gestores.reduce((sum: number, g: Gestor) => sum + g.llamadas, 0) / gestores.length);
-  const metaTotal = meta * gestores.length;
+  const totalRenovaciones = gestores.reduce((sum: number, g: Manager) => sum + g.renovaciones, 0);
+  const promedioCalidad = gestores.length > 0 ? (gestores.reduce((sum: number, g: Manager) => sum + g.calidad, 0) / gestores.length).toFixed(1) : "0";
+  const promedioAtrasos = gestores.length > 0 ? (gestores.reduce((sum: number, g: Manager) => sum + g.atrasos, 0) / gestores.length).toFixed(2) : "0";
+  const promedioLlamadas = gestores.length > 0 ? Math.round(gestores.reduce((sum: number, g: Manager) => sum + g.llamadas, 0) / gestores.length) : 0;
+  const metaTotal = meta * (gestores.length || 23);
   
   // Top performers
   const sortedByRenovaciones = [...gestores].sort((a, b) => b.renovaciones - a.renovaciones);
-  const mejorRenovaciones = sortedByRenovaciones[0];
-  const mejorCalidad = [...gestores].sort((a, b) => b.calidad - a.calidad)[0];
+  const mejorRenovaciones = sortedByRenovaciones[0] || { nombre: "Sin datos", renovaciones: 0, calidad: 0 };
+  const mejorCalidad = [...gestores].sort((a, b) => b.calidad - a.calidad)[0] || { nombre: "Sin datos", calidad: 0 };
   
   // Calcular mejor gestor del mes (promedio de 4 semanas) cuando estamos en S4
   const getMonthlyTopGestor = () => {
@@ -199,8 +150,28 @@ export default function Dashboard() {
     return promedios.sort((a, b) => b.renovaciones - a.renovaciones)[0];
   };
 
+  const handleExport = () => {
+    const csv = [
+      ['Gestor', 'Renovaciones', 'Calidad', 'Atrasos', 'Llamadas'].join(','),
+      ...gestores.map(g => [g.nombre, g.renovaciones, g.calidad, g.atrasos, g.llamadas].join(','))
+    ].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `renovaciones-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+  };
+
+  const isLastWeek = currentWeek === 4;
+
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20">
+      {isLoading && (
+        <div className="fixed inset-0 bg-background/50 flex items-center justify-center z-50">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      )}
       {/* Header */}
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
@@ -348,10 +319,10 @@ export default function Dashboard() {
             <CardContent className="relative z-10">
               <div className="flex flex-col items-center text-center mt-4">
                 <div className="w-24 h-24 rounded-full border-4 border-white/30 bg-white/10 flex items-center justify-center text-3xl font-bold mb-4 shadow-xl backdrop-blur-sm">
-                  {mejorRenovaciones.nombre.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                  {mejorRenovaciones.nombre !== "Sin datos" ? mejorRenovaciones.nombre.split(' ').map(n => n[0]).slice(0, 2).join('') : "??"}
                 </div>
                 <h3 className="text-xl font-bold leading-tight mb-1">{mejorRenovaciones.nombre}</h3>
-                <p className="text-white/80 text-sm mb-6">Top Performer en Renovaciones</p>
+                <p className="text-white/80 text-sm mb-6">{isLastWeek ? "Mejor Gestor del Mes" : `Mejor Gestor Semana S${currentWeek}`}</p>
                 
                 <div className="grid grid-cols-2 gap-4 w-full">
                   <div className="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/10">
