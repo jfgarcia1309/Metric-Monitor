@@ -24,9 +24,9 @@ export default function AdminPanel() {
   const [currentWeek, setCurrentWeek] = useState(4);
   const [, navigate] = useLocation();
 
-  const [gestoresList, setGestoresList] = useState<Manager[]>([]);
+  const [gestoresList, setGestoresList] = useState<any[]>([]);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editValues, setEditValues] = useState<Manager | null>(null);
+  const [editValues, setEditValues] = useState<any | null>(null);
 
   const { data: managers = [] } = useQuery<Manager[]>({
     queryKey: ['/api/managers/week', currentWeek],
@@ -38,13 +38,13 @@ export default function AdminPanel() {
   });
 
   const mutation = useMutation({
-    mutationFn: async (newManager: InsertManager) => {
+    mutationFn: async (newManager: any) => {
       const res = await apiRequest('POST', '/api/managers', newManager, {
-        headers: { 'x-admin-password': password }
+        headers: { 'x-admin-password': password.trim() }
       });
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to add manager');
+        throw new Error(errorData.message || 'Error al agregar gestor');
       }
       return res.json();
     },
@@ -55,7 +55,7 @@ export default function AdminPanel() {
         nombre: '', 
         renovaciones: 0, 
         calidad: 0, 
-        atrasos: 0, 
+        atrasos: '0', 
         llamadas: 0, 
         conectividad: 70, 
         semana: currentWeek 
@@ -66,18 +66,20 @@ export default function AdminPanel() {
     }
   });
 
-  const [newGestor, setNewGestor] = useState<InsertManager>({
+  const [newGestor, setNewGestor] = useState<any>({
     nombre: '',
     renovaciones: 0,
     calidad: 0,
-    atrasos: 0,
+    atrasos: '0',
     llamadas: 0,
     conectividad: 70,
     semana: currentWeek
   });
 
   const handleLogin = () => {
-    if (password === 'Bogota123*') {
+    const cleanPassword = password.trim();
+    if (cleanPassword === 'Bogota123*') {
+      setPassword(cleanPassword);
       setIsAdmin(true);
       toast.success('Acceso concedido');
     } else {
@@ -125,18 +127,21 @@ export default function AdminPanel() {
         
         let count = 0;
         for (let i = 1; i < lines.length; i++) {
-          const [nombre, renovaciones, calidad, atrasos, llamadas] = lines[i].split(',').map(v => v.trim());
+          const values = lines[i].split(',').map(v => v.trim());
+          const [nombre, renovaciones, calidad, atrasos, llamadas] = values;
+          
           if (nombre) {
+            const atrasosNum = parseFloat(atrasos.replace(',', '.')) || 0;
             await apiRequest('POST', '/api/managers', {
               nombre,
               renovaciones: parseInt(renovaciones) || 0,
               calidad: parseInt(calidad) || 0,
-              atrasos: parseFloat(atrasos) || 0,
+              atrasos: atrasosNum,
               llamadas: parseInt(llamadas) || 0,
               conectividad: 70,
               semana: currentWeek
             }, {
-              headers: { 'x-admin-password': password }
+              headers: { 'x-admin-password': password.trim() }
             });
             count++;
           }
@@ -163,15 +168,18 @@ export default function AdminPanel() {
   const handleSaveEdit = async () => {
     if (editingIndex !== null && editValues) {
       try {
+        const valStr = String(editValues.atrasos || '0').replace(',', '.');
+        const atrasosNum = parseFloat(valStr);
+
         await apiRequest('PATCH', `/api/managers/${editValues.id}`, {
           ...editValues,
-          renovaciones: Number(editValues.renovaciones),
-          calidad: Number(editValues.calidad),
-          atrasos: Number(editValues.atrasos),
-          llamadas: Number(editValues.llamadas),
+          renovaciones: Number(editValues.renovaciones || 0),
+          calidad: Number(editValues.calidad || 0),
+          atrasos: isNaN(atrasosNum) ? 0 : atrasosNum,
+          llamadas: Number(editValues.llamadas || 0),
           semana: Number(currentWeek)
         }, {
-          headers: { 'x-admin-password': password }
+          headers: { 'x-admin-password': password.trim() }
         });
         queryClient.invalidateQueries({ queryKey: ['/api/managers/week', currentWeek] });
         setEditingIndex(null);
@@ -187,7 +195,7 @@ export default function AdminPanel() {
     const gestor = managers[index];
     try {
       await apiRequest('DELETE', `/api/managers/${gestor.id}`, undefined, {
-        headers: { 'x-admin-password': password }
+        headers: { 'x-admin-password': password.trim() }
       });
       queryClient.invalidateQueries({ queryKey: ['/api/managers/week', currentWeek] });
       toast.success('Gestor eliminado');
@@ -201,15 +209,21 @@ export default function AdminPanel() {
       toast.error('El nombre es requerido');
       return;
     }
-    mutation.mutate({ 
-      ...newGestor, 
-      semana: currentWeek,
-      renovaciones: Number(newGestor.renovaciones),
-      calidad: Number(newGestor.calidad),
-      atrasos: Number(newGestor.atrasos),
-      llamadas: Number(newGestor.llamadas),
-      conectividad: 70
-    });
+    
+    const rawAtrasos = String(newGestor.atrasos || '0').replace(',', '.');
+    const atrasosNum = parseFloat(rawAtrasos);
+
+    const payload = { 
+      nombre: newGestor.nombre,
+      renovaciones: Number(newGestor.renovaciones || 0),
+      calidad: Number(newGestor.calidad || 0),
+      atrasos: isNaN(atrasosNum) ? 0 : atrasosNum,
+      llamadas: Number(newGestor.llamadas || 0),
+      conectividad: 70,
+      semana: currentWeek
+    };
+
+    mutation.mutate(payload);
   };
 
   const handleDownloadTemplate = () => {
@@ -371,11 +385,13 @@ export default function AdminPanel() {
               <div>
                 <label className="text-sm font-medium">Atrasos %</label>
                 <Input
-                  type="number"
-                  step="0.1"
+                  type="text"
                   placeholder="Ej: 1.5"
                   value={newGestor.atrasos}
-                  onChange={(e) => setNewGestor({ ...newGestor, atrasos: e.target.value === '' ? 0 : Number(e.target.value) })}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(',', '.');
+                    setNewGestor({ ...newGestor, atrasos: val === '' ? 0 : val });
+                  }}
                   data-testid="input-new-atrasos"
                 />
               </div>
@@ -450,10 +466,12 @@ export default function AdminPanel() {
                           </TableCell>
                           <TableCell>
                             <Input
-                              type="number"
-                              step="0.1"
+                              type="text"
                               value={editValues.atrasos}
-                              onChange={(e) => setEditValues({ ...editValues, atrasos: e.target.value === '' ? 0 : Number(e.target.value) })}
+                              onChange={(e) => {
+                                const val = e.target.value.replace(',', '.');
+                                setEditValues({ ...editValues, atrasos: val });
+                              }}
                               className="text-center text-sm"
                             />
                           </TableCell>
