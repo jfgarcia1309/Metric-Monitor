@@ -38,13 +38,12 @@ export default function AdminPanel() {
 
   const mutation = useMutation({
     mutationFn: async (newManager: any) => {
+      const auth = password.trim() || window.sessionStorage.getItem('admin_password');
+      if (!auth) throw new Error('No se encontró la sesión de admin');
+      
       const res = await apiRequest('POST', '/api/managers', newManager, {
-        headers: { 'x-admin-password': password.trim() }
+        'x-admin-password': auth
       });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || 'Error al agregar gestor');
-      }
       return res.json();
     },
     onSuccess: () => {
@@ -78,8 +77,9 @@ export default function AdminPanel() {
   const handleLogin = () => {
     const cleanPassword = password.trim();
     if (cleanPassword === 'Bogota123*') {
-      setPassword(cleanPassword);
       setIsAdmin(true);
+      setPassword(cleanPassword);
+      window.sessionStorage.setItem('admin_password', cleanPassword);
       toast.success('Acceso concedido');
     } else {
       toast.error('Contraseña incorrecta');
@@ -125,6 +125,7 @@ export default function AdminPanel() {
         const lines = csv.split('\n').filter(l => l.trim());
         
         let count = 0;
+        const storedPassword = window.sessionStorage.getItem('admin_password') || password.trim();
         for (let i = 1; i < lines.length; i++) {
           const values = lines[i].split(',').map(v => v.trim());
           const [nombre, renovaciones, calidad, atrasos, llamadas] = values;
@@ -140,7 +141,7 @@ export default function AdminPanel() {
               conectividad: 70,
               semana: currentWeek
             }, {
-              headers: { 'x-admin-password': password.trim() }
+              'x-admin-password': storedPassword
             });
             count++;
           }
@@ -169,6 +170,10 @@ export default function AdminPanel() {
       try {
         const valStr = String(editValues.atrasos || '0').replace(',', '.');
         const atrasosNum = parseFloat(valStr);
+        const storedPassword = window.sessionStorage.getItem('admin_password');
+        const auth = password.trim() || storedPassword;
+
+        if (!auth) throw new Error('No se encontró la sesión de admin');
 
         await apiRequest('PATCH', `/api/managers/${editValues.id}`, {
           ...editValues,
@@ -178,7 +183,7 @@ export default function AdminPanel() {
           llamadas: Number(editValues.llamadas || 0),
           semana: Number(currentWeek)
         }, {
-          headers: { 'x-admin-password': password.trim() }
+          'x-admin-password': auth
         });
         queryClient.invalidateQueries({ queryKey: ['/api/managers/week', currentWeek] });
         setEditingIndex(null);
@@ -192,9 +197,17 @@ export default function AdminPanel() {
 
   const handleDelete = async (index: number) => {
     const gestor = managers[index];
+    const storedPassword = window.sessionStorage.getItem('admin_password');
+    const auth = password.trim() || storedPassword;
+
+    if (!auth) {
+      toast.error('No se encontró la sesión de admin');
+      return;
+    }
+
     try {
       await apiRequest('DELETE', `/api/managers/${gestor.id}`, undefined, {
-        headers: { 'x-admin-password': password.trim() }
+        'x-admin-password': auth
       });
       queryClient.invalidateQueries({ queryKey: ['/api/managers/week', currentWeek] });
       toast.success('Gestor eliminado');
@@ -203,7 +216,7 @@ export default function AdminPanel() {
     }
   };
 
-  const handleAddGestor = () => {
+  const handleAddGestor = async () => {
     if (!newGestor.nombre) {
       toast.error('El nombre es requerido');
       return;

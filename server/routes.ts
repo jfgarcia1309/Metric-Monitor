@@ -19,8 +19,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/managers", async (req, res) => {
-    const password = req.headers['x-admin-password'];
-    if (password !== 'Bogota123*') {
+    const authHeader = req.headers['x-admin-password'];
+    if (authHeader !== 'Bogota123*') {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
