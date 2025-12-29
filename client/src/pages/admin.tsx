@@ -168,7 +168,8 @@ export default function AdminPanel() {
           renovaciones: Number(editValues.renovaciones),
           calidad: Number(editValues.calidad),
           atrasos: Number(editValues.atrasos),
-          llamadas: Number(editValues.llamadas)
+          llamadas: Number(editValues.llamadas),
+          semana: Number(currentWeek)
         }, {
           headers: { 'x-admin-password': password }
         });
@@ -206,7 +207,8 @@ export default function AdminPanel() {
       renovaciones: Number(newGestor.renovaciones),
       calidad: Number(newGestor.calidad),
       atrasos: Number(newGestor.atrasos),
-      llamadas: Number(newGestor.llamadas)
+      llamadas: Number(newGestor.llamadas),
+      conectividad: 70
     });
   };
 
@@ -375,6 +377,16 @@ export default function AdminPanel() {
                   value={newGestor.atrasos}
                   onChange={(e) => setNewGestor({ ...newGestor, atrasos: e.target.value === '' ? 0 : Number(e.target.value) })}
                   data-testid="input-new-atrasos"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Llamadas</label>
+                <Input
+                  type="number"
+                  placeholder="Ej: 50"
+                  value={newGestor.llamadas}
+                  onChange={(e) => setNewGestor({ ...newGestor, llamadas: e.target.value === '' ? 0 : Number(e.target.value) })}
+                  data-testid="input-new-llamadas"
                 />
               </div>
               <Button 
