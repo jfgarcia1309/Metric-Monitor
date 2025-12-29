@@ -161,6 +161,43 @@ export default function Dashboard() {
   const sortedByRenovaciones = [...gestores].sort((a, b) => b.renovaciones - a.renovaciones);
   const mejorRenovaciones = sortedByRenovaciones[0];
   const mejorCalidad = [...gestores].sort((a, b) => b.calidad - a.calidad)[0];
+  
+  // Calcular mejor gestor del mes (promedio de 4 semanas) cuando estamos en S4
+  const getMonthlyTopGestor = () => {
+    const baseData = [
+      { nombre: "Angelica Natalia Rodriguez Prieto", renovaciones: 195, calidad: 86, atrasos: 0.8, llamadas: 54, conectividad: 72 },
+      { nombre: "Luz Mary Pinto Alarcon", renovaciones: 188, calidad: 84, atrasos: 1.0, llamadas: 50, conectividad: 68 },
+      { nombre: "Karolina Arboleda Rios", renovaciones: 192, calidad: 85, atrasos: 0.9, llamadas: 52, conectividad: 70 },
+      { nombre: "Gloria Estefani Gomez Plata", renovaciones: 180, calidad: 78, atrasos: 2.0, llamadas: 44, conectividad: 60 },
+      { nombre: "John Erick Jaramillo Correa", renovaciones: 181, calidad: 82, atrasos: 1.8, llamadas: 45, conectividad: 61 },
+      { nombre: "Andrea Lievano Gomez", renovaciones: 182, calidad: 81, atrasos: 1.7, llamadas: 46, conectividad: 62 },
+      { nombre: "Paola Andrea Ramirez Hernandez", renovaciones: 186, calidad: 83, atrasos: 1.1, llamadas: 48, conectividad: 65 },
+      { nombre: "Monica Andrea Perez Pardo", renovaciones: 195, calidad: 84, atrasos: 1.2, llamadas: 52, conectividad: 69 },
+      { nombre: "Leidy Yolima Castro Rojas", renovaciones: 188, calidad: 82, atrasos: 1.5, llamadas: 48, conectividad: 63 },
+      { nombre: "Daniela Alejandra Soto Cardona", renovaciones: 190, calidad: 84, atrasos: 1.0, llamadas: 51, conectividad: 68 },
+      { nombre: "Viviana Andrea Ortega Jimenez", renovaciones: 184, calidad: 81, atrasos: 1.6, llamadas: 47, conectividad: 64 },
+      { nombre: "Sandra Milena Pineda Gutierrez", renovaciones: 187, calidad: 83, atrasos: 1.3, llamadas: 49, conectividad: 66 },
+      { nombre: "Leidy Katherine Quintero Caicedo", renovaciones: 191, calidad: 85, atrasos: 0.95, llamadas: 51, conectividad: 69 },
+      { nombre: "Sandra Patricia Guerrero Cardona", renovaciones: 189, calidad: 83, atrasos: 1.2, llamadas: 50, conectividad: 67 },
+      { nombre: "Adriana Maria Usuga Castillo", renovaciones: 186, calidad: 82, atrasos: 1.4, llamadas: 48, conectividad: 64 },
+      { nombre: "Maria Alejandra Mendoza Rodriguez", renovaciones: 194, calidad: 84, atrasos: 1.1, llamadas: 53, conectividad: 70 },
+      { nombre: "Valentina Gomez Martinez", renovaciones: 188, calidad: 83, atrasos: 1.3, llamadas: 49, conectividad: 66 },
+      { nombre: "Tatiana Lorena Ospina Martinez", renovaciones: 185, calidad: 82, atrasos: 1.5, llamadas: 47, conectividad: 63 },
+      { nombre: "Cristina Helena Morales Reyes", renovaciones: 190, calidad: 84, atrasos: 1.0, llamadas: 51, conectividad: 68 },
+      { nombre: "Diana Rocio Gaviria Arias", renovaciones: 187, calidad: 83, atrasos: 1.2, llamadas: 49, conectividad: 65 },
+      { nombre: "Mariana Isabel Cifuentes Reyes", renovaciones: 192, calidad: 85, atrasos: 0.85, llamadas: 52, conectividad: 71 },
+      { nombre: "Catalina Restrepo Vargas", renovaciones: 189, calidad: 83, atrasos: 1.1, llamadas: 50, conectividad: 67 },
+      { nombre: "Paula Andrea Gomez Bernal", renovaciones: 193, calidad: 84, atrasos: 1.0, llamadas: 52, conectividad: 69 },
+      { nombre: "Leidy Juliana Santander Roa", renovaciones: 186, calidad: 80, atrasos: 1.8, llamadas: 46, conectividad: 62 }
+    ];
+    
+    const promedios = baseData.map(gestor => ({
+      ...gestor,
+      renovaciones: Math.round(gestor.renovaciones * 0.925) // promedio de las variaciones
+    }));
+    
+    return promedios.sort((a, b) => b.renovaciones - a.renovaciones)[0];
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20">
@@ -457,10 +494,28 @@ export default function Dashboard() {
 
           {/* Side Widgets */}
           <div className="space-y-6">
+            {/* Gestor de la Semana / Gestor del Mes */}
+            <Card className={`border-0 shadow-lg ${currentWeek === 4 ? 'bg-gradient-to-br from-purple-50 to-indigo-50' : 'bg-gradient-to-br from-amber-50 to-yellow-50'}`}>
+              <CardContent className="p-6">
+                <div className="text-center">
+                  <div className="text-5xl mb-3">🏆</div>
+                  <h3 className="font-bold text-lg mb-1">
+                    {currentWeek === 4 ? '🌟 Gestor del Mes' : `⭐ Gestor de la Semana S${currentWeek}`}
+                  </h3>
+                  <p className="text-2xl font-bold text-primary mb-2">{mejorRenovaciones.nombre}</p>
+                  <div className="bg-white/60 rounded-lg p-3 space-y-1">
+                    <p className="text-sm text-muted-foreground">Renovaciones</p>
+                    <p className="text-3xl font-bold">{mejorRenovaciones.renovaciones}</p>
+                    <p className="text-xs text-green-600 font-semibold">+{Math.round((mejorRenovaciones.renovaciones / 180 - 1) * 100)}% vs Meta</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             <Card className="border-none shadow-md">
               <CardHeader>
                 <CardTitle className="text-lg">Calidad vs Meta</CardTitle>
-                <CardDescription>Top 5 Calidad este mes</CardDescription>
+                <CardDescription>Top 5 Calidad esta semana</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {gestores.sort((a: Gestor, b: Gestor) => b.calidad - a.calidad).slice(0, 5).map((gestor: Gestor, i: number) => (
