@@ -20,7 +20,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/managers", async (req, res) => {
     const password = req.headers['x-admin-password'];
-    if (password !== 'admin123') {
+    if (password !== 'Bogota123*') {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
@@ -34,7 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/managers/:id", async (req, res) => {
     const password = req.headers['x-admin-password'];
-    if (password !== 'admin123') {
+    if (password !== 'Bogota123*') {
       return res.status(401).json({ message: "Unauthorized" });
     }
     const result = insertManagerSchema.partial().safeParse(req.body);
@@ -47,7 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/managers/:id", async (req, res) => {
     const password = req.headers['x-admin-password'];
-    if (password !== 'admin123') {
+    if (password !== 'Bogota123*') {
       return res.status(401).json({ message: "Unauthorized" });
     }
     await storage.deleteManager(req.params.id);

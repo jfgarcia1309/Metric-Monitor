@@ -64,7 +64,7 @@ export default function AdminPanel() {
   });
 
   const handleLogin = () => {
-    if (password === 'admin123') {
+    if (password === 'Bogota123*') {
       setIsAdmin(true);
       toast.success('Acceso concedido');
     } else {
