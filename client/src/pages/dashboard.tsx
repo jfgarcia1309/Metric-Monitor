@@ -85,36 +85,37 @@ export default function Dashboard() {
   }, []);
 
   const gestores: Gestor[] = [
-    { nombre: "Monica Andrea Perez Pardo", renovaciones: 192, calidad: 78, atrasos: 3.2, llamadas: 52, conectividad: 68 },
-    { nombre: "Leidy Yolima Castro Rojas", renovaciones: 168, calidad: 75, atrasos: 3.5, llamadas: 48, conectividad: 65 },
-    { nombre: "Laura Alejandra Cañas Prieto", renovaciones: 181, calidad: 79, atrasos: 2.8, llamadas: 55, conectividad: 72 },
-    { nombre: "Tatiana Paola Rosas Munevar", renovaciones: 156, calidad: 73, atrasos: 4.2, llamadas: 42, conectividad: 58 },
-    { nombre: "Lina Tatiana Bogota Murcia", renovaciones: 174, calidad: 77, atrasos: 3.6, llamadas: 50, conectividad: 67 },
-    { nombre: "Ingrid Marcela Peña Buitrago", renovaciones: 165, calidad: 74, atrasos: 3.9, llamadas: 46, conectividad: 62 },
-    { nombre: "Fernanda Romero Saenz", renovaciones: 178, calidad: 80, atrasos: 2.9, llamadas: 53, conectividad: 70 },
-    { nombre: "Andrea Lievano Gomez", renovaciones: 159, calidad: 72, atrasos: 4.1, llamadas: 44, conectividad: 60 },
-    { nombre: "Luz Mary Pinto Alarcon", renovaciones: 189, calidad: 82, atrasos: 2.1, llamadas: 58, conectividad: 75 },
-    { nombre: "Gloria Estefani Gomez Plata", renovaciones: 152, calidad: 70, atrasos: 4.5, llamadas: 40, conectividad: 55 },
-    { nombre: "Monica Alexandra Rey Munevar", renovaciones: 171, calidad: 76, atrasos: 3.7, llamadas: 49, conectividad: 66 },
-    { nombre: "Maria Elena Vanegas Silguero", renovaciones: 186, calidad: 81, atrasos: 2.5, llamadas: 54, conectividad: 71 },
-    { nombre: "Yina Sanchez Roa", renovaciones: 162, calidad: 75, atrasos: 3.8, llamadas: 47, conectividad: 63 },
-    { nombre: "Manuel David Casas Orjuela", renovaciones: 175, calidad: 78, atrasos: 3.1, llamadas: 51, conectividad: 68 },
-    { nombre: "Juan David Perez Moreno", renovaciones: 157, calidad: 71, atrasos: 4.3, llamadas: 43, conectividad: 59 },
-    { nombre: "Angelica Natalia Rodriguez Prieto", renovaciones: 195, calidad: 84, atrasos: 2.0, llamadas: 56, conectividad: 74 },
-    { nombre: "Jessica Tatiana Valderrama Roa", renovaciones: 160, calidad: 74, atrasos: 4.0, llamadas: 45, conectividad: 61 },
-    { nombre: "Daniela Ramirez Pacheco", renovaciones: 169, calidad: 77, atrasos: 3.4, llamadas: 50, conectividad: 67 },
-    { nombre: "John Erick Jaramillo Correa", renovaciones: 148, calidad: 69, atrasos: 4.6, llamadas: 41, conectividad: 56 },
-    { nombre: "Karolina Arboleda Rios", renovaciones: 191, calidad: 81, atrasos: 2.3, llamadas: 57, conectividad: 73 },
-    { nombre: "Alisson Mora Benavidez", renovaciones: 170, calidad: 76, atrasos: 3.5, llamadas: 48, conectividad: 65 },
-    { nombre: "Paula Andrea Gomez Bernal", renovaciones: 177, calidad: 79, atrasos: 3.0, llamadas: 52, conectividad: 69 },
-    { nombre: "Leidy Juliana Santander Roa", renovaciones: 164, calidad: 74, atrasos: 3.9, llamadas: 46, conectividad: 62 }
+    { nombre: "Monica Andrea Perez Pardo", renovaciones: 195, calidad: 84, atrasos: 1.2, llamadas: 52, conectividad: 68 },
+    { nombre: "Leidy Yolima Castro Rojas", renovaciones: 188, calidad: 82, atrasos: 1.5, llamadas: 48, conectividad: 65 },
+    { nombre: "Laura Alejandra Cañas Prieto", renovaciones: 192, calidad: 86, atrasos: 0.8, llamadas: 55, conectividad: 72 },
+    { nombre: "Tatiana Paola Rosas Munevar", renovaciones: 185, calidad: 81, atrasos: 1.8, llamadas: 42, conectividad: 58 },
+    { nombre: "Lina Tatiana Bogota Murcia", renovaciones: 191, calidad: 83, atrasos: 1.3, llamadas: 50, conectividad: 67 },
+    { nombre: "Ingrid Marcela Peña Buitrago", renovaciones: 186, calidad: 80, atrasos: 1.9, llamadas: 46, conectividad: 62 },
+    { nombre: "Fernanda Romero Saenz", renovaciones: 194, calidad: 85, atrasos: 0.9, llamadas: 53, conectividad: 70 },
+    { nombre: "Andrea Lievano Gomez", renovaciones: 182, calidad: 79, atrasos: 1.7, llamadas: 44, conectividad: 60 },
+    { nombre: "Luz Mary Pinto Alarcon", renovaciones: 198, calidad: 88, atrasos: 0.5, llamadas: 58, conectividad: 75 },
+    { nombre: "Gloria Estefani Gomez Plata", renovaciones: 180, calidad: 78, atrasos: 1.9, llamadas: 40, conectividad: 55 },
+    { nombre: "Monica Alexandra Rey Munevar", renovaciones: 189, calidad: 82, atrasos: 1.4, llamadas: 49, conectividad: 66 },
+    { nombre: "Maria Elena Vanegas Silguero", renovaciones: 196, calidad: 87, atrasos: 0.7, llamadas: 54, conectividad: 71 },
+    { nombre: "Yina Sanchez Roa", renovaciones: 187, calidad: 81, atrasos: 1.6, llamadas: 47, conectividad: 63 },
+    { nombre: "Manuel David Casas Orjuela", renovaciones: 190, calidad: 84, atrasos: 1.1, llamadas: 51, conectividad: 68 },
+    { nombre: "Juan David Perez Moreno", renovaciones: 183, calidad: 80, atrasos: 1.8, llamadas: 43, conectividad: 59 },
+    { nombre: "Angelica Natalia Rodriguez Prieto", renovaciones: 199, calidad: 89, atrasos: 0.4, llamadas: 56, conectividad: 74 },
+    { nombre: "Jessica Tatiana Valderrama Roa", renovaciones: 184, calidad: 81, atrasos: 1.7, llamadas: 45, conectividad: 61 },
+    { nombre: "Daniela Ramirez Pacheco", renovaciones: 188, calidad: 83, atrasos: 1.2, llamadas: 50, conectividad: 67 },
+    { nombre: "John Erick Jaramillo Correa", renovaciones: 181, calidad: 79, atrasos: 1.9, llamadas: 41, conectividad: 56 },
+    { nombre: "Karolina Arboleda Rios", renovaciones: 197, calidad: 86, atrasos: 0.6, llamadas: 57, conectividad: 73 },
+    { nombre: "Alisson Mora Benavidez", renovaciones: 189, calidad: 82, atrasos: 1.4, llamadas: 48, conectividad: 65 },
+    { nombre: "Paula Andrea Gomez Bernal", renovaciones: 193, calidad: 84, atrasos: 1.0, llamadas: 52, conectividad: 69 },
+    { nombre: "Leidy Juliana Santander Roa", renovaciones: 186, calidad: 80, atrasos: 1.8, llamadas: 46, conectividad: 62 }
   ];
 
-  const meta = 174;
+  const meta = 180;
   const totalRenovaciones = gestores.reduce((sum, g) => sum + g.renovaciones, 0);
   const promedioCalidad = (gestores.reduce((sum, g) => sum + g.calidad, 0) / gestores.length).toFixed(1);
   const promedioAtrasos = (gestores.reduce((sum, g) => sum + g.atrasos, 0) / gestores.length).toFixed(2);
   const promedioLlamadas = Math.round(gestores.reduce((sum, g) => sum + g.llamadas, 0) / gestores.length);
+  const metaTotal = meta * gestores.length;
   
   // Top performers
   const sortedByRenovaciones = [...gestores].sort((a, b) => b.renovaciones - a.renovaciones);
@@ -152,7 +153,7 @@ export default function Dashboard() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Resumen General</h2>
-            <p className="text-muted-foreground mt-1">Monitoreo de KPIs y rendimiento del equipo en tiempo real.</p>
+            <p className="text-muted-foreground mt-1">KPIs: 180+ renovaciones/mes | Calidad {'>'}80% | Atrasos ≤2% | 100% cumplimiento</p>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm">
@@ -182,9 +183,9 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap justify-around items-center gap-8 py-4">
-                <CircularProgress value={totalRenovaciones} max={4002} label="Total Renovaciones" color="hsl(var(--primary))" sublabel="Meta: 4002" />
-                <CircularProgress value={Math.min(mejorRenovaciones.renovaciones, 174)} max={174} label="Mejor Efectividad" color="hsl(var(--chart-2))" sublabel="Meta Individual: 174" />
-                <CircularProgress value={parseFloat(promedioCalidad)} max={100} label="Calidad Promedio" color="hsl(var(--chart-3))" sublabel="Meta: 76%" />
+                <CircularProgress value={totalRenovaciones} max={metaTotal} label="Total Renovaciones" color="hsl(var(--primary))" sublabel={`Meta: ${metaTotal}`} />
+                <CircularProgress value={Math.min(mejorRenovaciones.renovaciones, 180)} max={180} label="Mejor Efectividad" color="hsl(var(--chart-2))" sublabel="Meta Individual: 180" />
+                <CircularProgress value={parseFloat(promedioCalidad)} max={100} label="Calidad Promedio" color="hsl(var(--chart-3))" sublabel="Meta: >80%" />
               </div>
             </CardContent>
           </Card>
@@ -252,8 +253,8 @@ export default function Dashboard() {
           </Card>
           <Card className="hover:shadow-md transition-shadow">
             <CardContent className="p-6 flex items-center gap-4">
-              <div className="p-3 bg-blue-500/10 text-blue-500 rounded-xl">
-                <Phone className="w-6 h-6" />
+              <div className={`p-3 ${parseFloat(promedioAtrasos) <= 2 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'} rounded-xl`}>
+                <Clock className="w-6 h-6" />
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Media Atrasos</p>
@@ -267,8 +268,8 @@ export default function Dashboard() {
                 <TrendingUp className="w-6 h-6" />
               </div>
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Meta Mensual</p>
-                <h3 className="text-2xl font-bold">174</h3>
+                <p className="text-sm font-medium text-muted-foreground">Meta por Gestor</p>
+                <h3 className="text-2xl font-bold">180+</h3>
               </div>
             </CardContent>
           </Card>
