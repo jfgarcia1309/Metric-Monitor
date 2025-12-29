@@ -91,7 +91,8 @@ export default function Dashboard() {
       const res = await fetch(`/api/managers/week/${currentWeek}`);
       if (!res.ok) throw new Error('Failed to fetch managers');
       return res.json();
-    }
+    },
+    refetchInterval: 5000 // Sincronización automática cada 5 segundos
   });
 
   useEffect(() => {

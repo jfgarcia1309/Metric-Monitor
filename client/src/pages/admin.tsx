@@ -42,14 +42,27 @@ export default function AdminPanel() {
       const res = await apiRequest('POST', '/api/managers', newManager, {
         headers: { 'x-admin-password': password }
       });
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Failed to add manager');
+      }
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/managers/week', currentWeek] });
       toast.success('✅ Gestor añadido exitosamente');
+      setNewGestor({ 
+        nombre: '', 
+        renovaciones: 0, 
+        calidad: 0, 
+        atrasos: 0, 
+        llamadas: 0, 
+        conectividad: 70, 
+        semana: currentWeek 
+      });
     },
-    onError: () => {
-      toast.error('Error al añadir gestor. Verifica la contraseña.');
+    onError: (error: Error) => {
+      toast.error(`Error: ${error.message}`);
     }
   });
 
@@ -150,7 +163,13 @@ export default function AdminPanel() {
   const handleSaveEdit = async () => {
     if (editingIndex !== null && editValues) {
       try {
-        await apiRequest('PATCH', `/api/managers/${editValues.id}`, editValues, {
+        await apiRequest('PATCH', `/api/managers/${editValues.id}`, {
+          ...editValues,
+          renovaciones: Number(editValues.renovaciones),
+          calidad: Number(editValues.calidad),
+          atrasos: Number(editValues.atrasos),
+          llamadas: Number(editValues.llamadas)
+        }, {
           headers: { 'x-admin-password': password }
         });
         queryClient.invalidateQueries({ queryKey: ['/api/managers/week', currentWeek] });
@@ -181,8 +200,14 @@ export default function AdminPanel() {
       toast.error('El nombre es requerido');
       return;
     }
-    mutation.mutate({ ...newGestor, semana: currentWeek });
-    setNewGestor({ nombre: '', renovaciones: 0, calidad: 0, atrasos: 0, llamadas: 0, conectividad: 70, semana: currentWeek });
+    mutation.mutate({ 
+      ...newGestor, 
+      semana: currentWeek,
+      renovaciones: Number(newGestor.renovaciones),
+      calidad: Number(newGestor.calidad),
+      atrasos: Number(newGestor.atrasos),
+      llamadas: Number(newGestor.llamadas)
+    });
   };
 
   const handleDownloadTemplate = () => {
@@ -327,7 +352,7 @@ export default function AdminPanel() {
                   type="number"
                   placeholder="Ej: 190"
                   value={newGestor.renovaciones}
-                  onChange={(e) => setNewGestor({ ...newGestor, renovaciones: parseInt(e.target.value) })}
+                  onChange={(e) => setNewGestor({ ...newGestor, renovaciones: e.target.value === '' ? 0 : Number(e.target.value) })}
                   data-testid="input-new-renovaciones"
                 />
               </div>
@@ -337,7 +362,7 @@ export default function AdminPanel() {
                   type="number"
                   placeholder="Ej: 85"
                   value={newGestor.calidad}
-                  onChange={(e) => setNewGestor({ ...newGestor, calidad: parseInt(e.target.value) })}
+                  onChange={(e) => setNewGestor({ ...newGestor, calidad: e.target.value === '' ? 0 : Number(e.target.value) })}
                   data-testid="input-new-calidad"
                 />
               </div>
@@ -348,7 +373,7 @@ export default function AdminPanel() {
                   step="0.1"
                   placeholder="Ej: 1.5"
                   value={newGestor.atrasos}
-                  onChange={(e) => setNewGestor({ ...newGestor, atrasos: parseFloat(e.target.value) })}
+                  onChange={(e) => setNewGestor({ ...newGestor, atrasos: e.target.value === '' ? 0 : Number(e.target.value) })}
                   data-testid="input-new-atrasos"
                 />
               </div>
@@ -399,7 +424,7 @@ export default function AdminPanel() {
                             <Input
                               type="number"
                               value={editValues.renovaciones}
-                              onChange={(e) => setEditValues({ ...editValues, renovaciones: parseInt(e.target.value) })}
+                              onChange={(e) => setEditValues({ ...editValues, renovaciones: e.target.value === '' ? 0 : Number(e.target.value) })}
                               className="text-center text-sm"
                             />
                           </TableCell>
@@ -407,7 +432,7 @@ export default function AdminPanel() {
                             <Input
                               type="number"
                               value={editValues.calidad}
-                              onChange={(e) => setEditValues({ ...editValues, calidad: parseInt(e.target.value) })}
+                              onChange={(e) => setEditValues({ ...editValues, calidad: e.target.value === '' ? 0 : Number(e.target.value) })}
                               className="text-center text-sm"
                             />
                           </TableCell>
@@ -416,7 +441,7 @@ export default function AdminPanel() {
                               type="number"
                               step="0.1"
                               value={editValues.atrasos}
-                              onChange={(e) => setEditValues({ ...editValues, atrasos: parseFloat(e.target.value) })}
+                              onChange={(e) => setEditValues({ ...editValues, atrasos: e.target.value === '' ? 0 : Number(e.target.value) })}
                               className="text-center text-sm"
                             />
                           </TableCell>
@@ -424,7 +449,7 @@ export default function AdminPanel() {
                             <Input
                               type="number"
                               value={editValues.llamadas}
-                              onChange={(e) => setEditValues({ ...editValues, llamadas: parseInt(e.target.value) })}
+                              onChange={(e) => setEditValues({ ...editValues, llamadas: e.target.value === '' ? 0 : Number(e.target.value) })}
                               className="text-center text-sm"
                             />
                           </TableCell>
