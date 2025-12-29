@@ -12,7 +12,9 @@ import {
   Calendar,
   Download,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Zap,
+  AlertTriangle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -75,11 +77,58 @@ const CircularProgress = ({ value, max, label, color, sublabel }: { value: numbe
 export default function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showAllGestores, setShowAllGestores] = useState(false);
+  const [currentWeek, setCurrentWeek] = useState(4); // Semana actual (4)
   
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // Datos por semana (simulado - cada semana tiene variación)
+  const getWeeklyData = (week: number) => {
+    const baseData = [
+      { nombre: "Monica Andrea Perez Pardo", renovaciones: 195, calidad: 84, atrasos: 1.2, llamadas: 52, conectividad: 68 },
+      { nombre: "Leidy Yolima Castro Rojas", renovaciones: 188, calidad: 82, atrasos: 1.5, llamadas: 48, conectividad: 65 },
+      { nombre: "Laura Alejandra Cañas Prieto", renovaciones: 192, calidad: 86, atrasos: 0.8, llamadas: 55, conectividad: 72 },
+      { nombre: "Tatiana Paola Rosas Munevar", renovaciones: 185, calidad: 81, atrasos: 1.8, llamadas: 42, conectividad: 58 },
+      { nombre: "Lina Tatiana Bogota Murcia", renovaciones: 191, calidad: 83, atrasos: 1.3, llamadas: 50, conectividad: 67 },
+      { nombre: "Ingrid Marcela Peña Buitrago", renovaciones: 186, calidad: 80, atrasos: 1.9, llamadas: 46, conectividad: 62 },
+      { nombre: "Fernanda Romero Saenz", renovaciones: 194, calidad: 85, atrasos: 0.9, llamadas: 53, conectividad: 70 },
+      { nombre: "Andrea Lievano Gomez", renovaciones: 182, calidad: 79, atrasos: 1.7, llamadas: 44, conectividad: 60 },
+      { nombre: "Luz Mary Pinto Alarcon", renovaciones: 198, calidad: 88, atrasos: 0.5, llamadas: 58, conectividad: 75 },
+      { nombre: "Gloria Estefani Gomez Plata", renovaciones: 180, calidad: 78, atrasos: 1.9, llamadas: 40, conectividad: 55 },
+      { nombre: "Monica Alexandra Rey Munevar", renovaciones: 189, calidad: 82, atrasos: 1.4, llamadas: 49, conectividad: 66 },
+      { nombre: "Maria Elena Vanegas Silguero", renovaciones: 196, calidad: 87, atrasos: 0.7, llamadas: 54, conectividad: 71 },
+      { nombre: "Yina Sanchez Roa", renovaciones: 187, calidad: 81, atrasos: 1.6, llamadas: 47, conectividad: 63 },
+      { nombre: "Manuel David Casas Orjuela", renovaciones: 190, calidad: 84, atrasos: 1.1, llamadas: 51, conectividad: 68 },
+      { nombre: "Juan David Perez Moreno", renovaciones: 183, calidad: 80, atrasos: 1.8, llamadas: 43, conectividad: 59 },
+      { nombre: "Angelica Natalia Rodriguez Prieto", renovaciones: 199, calidad: 89, atrasos: 0.4, llamadas: 56, conectividad: 74 },
+      { nombre: "Jessica Tatiana Valderrama Roa", renovaciones: 184, calidad: 81, atrasos: 1.7, llamadas: 45, conectividad: 61 },
+      { nombre: "Daniela Ramirez Pacheco", renovaciones: 188, calidad: 83, atrasos: 1.2, llamadas: 50, conectividad: 67 },
+      { nombre: "John Erick Jaramillo Correa", renovaciones: 181, calidad: 79, atrasos: 1.9, llamadas: 41, conectividad: 56 },
+      { nombre: "Karolina Arboleda Rios", renovaciones: 197, calidad: 86, atrasos: 0.6, llamadas: 57, conectividad: 73 },
+      { nombre: "Alisson Mora Benavidez", renovaciones: 189, calidad: 82, atrasos: 1.4, llamadas: 48, conectividad: 65 },
+      { nombre: "Paula Andrea Gomez Bernal", renovaciones: 193, calidad: 84, atrasos: 1.0, llamadas: 52, conectividad: 69 },
+      { nombre: "Leidy Juliana Santander Roa", renovaciones: 186, calidad: 80, atrasos: 1.8, llamadas: 46, conectividad: 62 }
+    ];
+
+    // Variación semanal realista
+    const variations = [
+      { factor: 0.85, calidad: -3 }, // Semana 1: más baja
+      { factor: 0.90, calidad: -1 },  // Semana 2: mejora
+      { factor: 0.95, calidad: 1 },   // Semana 3: bien
+      { factor: 1.0, calidad: 2 }     // Semana 4: mejor
+    ];
+
+    const v = variations[week - 1] || variations[3];
+    
+    return baseData.map(g => ({
+      ...g,
+      renovaciones: Math.round(g.renovaciones * v.factor),
+      calidad: Math.min(g.calidad + v.calidad, 95),
+      atrasos: Math.max(g.atrasos + (v.factor < 1 ? 0.3 : -0.1), 0.2)
+    }));
+  };
 
   const handleExport = () => {
     const csv = [
@@ -94,31 +143,7 @@ export default function Dashboard() {
     a.click();
   };
 
-  const gestores: Gestor[] = [
-    { nombre: "Monica Andrea Perez Pardo", renovaciones: 195, calidad: 84, atrasos: 1.2, llamadas: 52, conectividad: 68 },
-    { nombre: "Leidy Yolima Castro Rojas", renovaciones: 188, calidad: 82, atrasos: 1.5, llamadas: 48, conectividad: 65 },
-    { nombre: "Laura Alejandra Cañas Prieto", renovaciones: 192, calidad: 86, atrasos: 0.8, llamadas: 55, conectividad: 72 },
-    { nombre: "Tatiana Paola Rosas Munevar", renovaciones: 185, calidad: 81, atrasos: 1.8, llamadas: 42, conectividad: 58 },
-    { nombre: "Lina Tatiana Bogota Murcia", renovaciones: 191, calidad: 83, atrasos: 1.3, llamadas: 50, conectividad: 67 },
-    { nombre: "Ingrid Marcela Peña Buitrago", renovaciones: 186, calidad: 80, atrasos: 1.9, llamadas: 46, conectividad: 62 },
-    { nombre: "Fernanda Romero Saenz", renovaciones: 194, calidad: 85, atrasos: 0.9, llamadas: 53, conectividad: 70 },
-    { nombre: "Andrea Lievano Gomez", renovaciones: 182, calidad: 79, atrasos: 1.7, llamadas: 44, conectividad: 60 },
-    { nombre: "Luz Mary Pinto Alarcon", renovaciones: 198, calidad: 88, atrasos: 0.5, llamadas: 58, conectividad: 75 },
-    { nombre: "Gloria Estefani Gomez Plata", renovaciones: 180, calidad: 78, atrasos: 1.9, llamadas: 40, conectividad: 55 },
-    { nombre: "Monica Alexandra Rey Munevar", renovaciones: 189, calidad: 82, atrasos: 1.4, llamadas: 49, conectividad: 66 },
-    { nombre: "Maria Elena Vanegas Silguero", renovaciones: 196, calidad: 87, atrasos: 0.7, llamadas: 54, conectividad: 71 },
-    { nombre: "Yina Sanchez Roa", renovaciones: 187, calidad: 81, atrasos: 1.6, llamadas: 47, conectividad: 63 },
-    { nombre: "Manuel David Casas Orjuela", renovaciones: 190, calidad: 84, atrasos: 1.1, llamadas: 51, conectividad: 68 },
-    { nombre: "Juan David Perez Moreno", renovaciones: 183, calidad: 80, atrasos: 1.8, llamadas: 43, conectividad: 59 },
-    { nombre: "Angelica Natalia Rodriguez Prieto", renovaciones: 199, calidad: 89, atrasos: 0.4, llamadas: 56, conectividad: 74 },
-    { nombre: "Jessica Tatiana Valderrama Roa", renovaciones: 184, calidad: 81, atrasos: 1.7, llamadas: 45, conectividad: 61 },
-    { nombre: "Daniela Ramirez Pacheco", renovaciones: 188, calidad: 83, atrasos: 1.2, llamadas: 50, conectividad: 67 },
-    { nombre: "John Erick Jaramillo Correa", renovaciones: 181, calidad: 79, atrasos: 1.9, llamadas: 41, conectividad: 56 },
-    { nombre: "Karolina Arboleda Rios", renovaciones: 197, calidad: 86, atrasos: 0.6, llamadas: 57, conectividad: 73 },
-    { nombre: "Alisson Mora Benavidez", renovaciones: 189, calidad: 82, atrasos: 1.4, llamadas: 48, conectividad: 65 },
-    { nombre: "Paula Andrea Gomez Bernal", renovaciones: 193, calidad: 84, atrasos: 1.0, llamadas: 52, conectividad: 69 },
-    { nombre: "Leidy Juliana Santander Roa", renovaciones: 186, calidad: 80, atrasos: 1.8, llamadas: 46, conectividad: 62 }
-  ];
+  const gestores = getWeeklyData(currentWeek);
 
   const meta = 180;
   const totalRenovaciones = gestores.reduce((sum, g) => sum + g.renovaciones, 0);
@@ -162,13 +187,27 @@ export default function Dashboard() {
         {/* Welcome Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h2 className="text-3xl font-bold tracking-tight">Resumen General</h2>
-            <p className="text-muted-foreground mt-1">KPIs: 180+ renovaciones/mes | Calidad {'>'}80% | Atrasos ≤2% | 100% cumplimiento</p>
+            <h2 className="text-3xl font-bold tracking-tight">Competencia Sana - Semana {currentWeek}</h2>
+            <p className="text-muted-foreground mt-1">Ranking semanal | KPIs: 180+ renovaciones/mes | Calidad {'>'}80% | Atrasos ≤2%</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex gap-1 bg-muted rounded-lg p-1">
+              {[1, 2, 3, 4].map(w => (
+                <Button
+                  key={w}
+                  variant={currentWeek === w ? "default" : "ghost"}
+                  size="sm"
+                  onClick={() => setCurrentWeek(w)}
+                  className="w-10"
+                  data-testid={`button-week-${w}`}
+                >
+                  S{w}
+                </Button>
+              ))}
+            </div>
             <Button variant="outline" size="sm" onClick={handleExport} data-testid="button-export">
               <Download className="mr-2 h-4 w-4" />
-              Descargar CSV
+              CSV
             </Button>
           </div>
         </div>
@@ -216,6 +255,79 @@ export default function Dashboard() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Top de la Semana y Necesita Mejorar */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* TOP DE LA SEMANA */}
+          <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-yellow-50 to-amber-50 relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-200/20 rounded-full -mr-16 -mt-16"></div>
+            <CardHeader className="relative z-10">
+              <div className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-yellow-500" />
+                <CardTitle className="text-2xl">🏆 TOP de la Semana</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              {sortedByRenovaciones.slice(0, 3).map((gestor, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className={`flex items-center gap-4 p-3 rounded-lg mb-3 ${
+                    i === 0 ? 'bg-yellow-100 border-l-4 border-yellow-500' :
+                    i === 1 ? 'bg-gray-100 border-l-4 border-gray-400' :
+                    'bg-orange-100 border-l-4 border-orange-400'
+                  }`}
+                >
+                  <div className="text-2xl font-bold w-8">
+                    {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm truncate">{gestor.nombre}</p>
+                    <p className="text-xs text-muted-foreground">{gestor.renovaciones} renovaciones</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-lg">{gestor.renovaciones}</p>
+                    <p className="text-xs text-green-600 font-semibold">+{Math.round((gestor.renovaciones / 180 - 1) * 100)}%</p>
+                  </div>
+                </motion.div>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* NECESITA MEJORAR */}
+          <Card className="overflow-hidden border-0 shadow-lg bg-gradient-to-br from-red-50 to-orange-50 relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-red-200/20 rounded-full -mr-16 -mt-16"></div>
+            <CardHeader className="relative z-10">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-500" />
+                <CardTitle className="text-2xl">⚠️ Necesita Mejorar</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              {sortedByRenovaciones.slice(-3).reverse().map((gestor, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className="flex items-center gap-4 p-3 rounded-lg mb-3 bg-red-100/60 border-l-4 border-red-500"
+                >
+                  <div className="text-xl">⚡</div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm truncate">{gestor.nombre}</p>
+                    <p className="text-xs text-muted-foreground">{gestor.renovaciones} renovaciones</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-lg text-red-600">{gestor.renovaciones}</p>
+                    <p className="text-xs text-red-600 font-semibold">{Math.round((gestor.renovaciones / 180 - 1) * 100)}%</p>
+                  </div>
+                </motion.div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Top Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
