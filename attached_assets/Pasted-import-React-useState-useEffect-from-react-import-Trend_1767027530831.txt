@@ -1,0 +1,299 @@
+import React, { useState, useEffect } from 'react';
+import { TrendingUp, TrendingDown, Award, Users, Phone, Clock, Target, Star } from 'lucide-react';
+
+const DashboardRenovaciones = () => {
+  const [currentTime, setCurrentTime] = useState(new Date());
+  
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const gestores = [
+    { nombre: "Monica Andrea Perez Pardo", renovaciones: 8, calidad: 82, atrasos: 2.5, llamadas: 52, conectividad: 68 },
+    { nombre: "Leidy Yolima Castro Rojas", renovaciones: 72, calidad: 78, atrasos: 3.2, llamadas: 48, conectividad: 65 },
+    { nombre: "Laura Alejandra Cañas Prieto", renovaciones: 65, calidad: 85, atrasos: 1.8, llamadas: 55, conectividad: 72 },
+    { nombre: "Tatiana Paola Rosas Munevar", renovaciones: 58, calidad: 76, atrasos: 4.1, llamadas: 42, conectividad: 58 },
+    { nombre: "Lina Tatiana Bogota Murcia", renovaciones: 70, calidad: 81, atrasos: 2.9, llamadas: 50, conectividad: 67 },
+    { nombre: "Ingrid Marcela Peña Buitrago", renovaciones: 63, calidad: 79, atrasos: 3.5, llamadas: 46, conectividad: 62 },
+    { nombre: "Fernanda Romero Saenz", renovaciones: 68, calidad: 83, atrasos: 2.1, llamadas: 53, conectividad: 70 },
+    { nombre: "Andrea Lievano Gomez", renovaciones: 61, calidad: 77, atrasos: 3.8, llamadas: 44, conectividad: 60 },
+    { nombre: "Luz Mary Pinto Alarcon", renovaciones: 75, calidad: 86, atrasos: 1.5, llamadas: 58, conectividad: 75 },
+    { nombre: "Gloria Estefani Gomez Plata", renovaciones: 59, calidad: 74, atrasos: 4.5, llamadas: 40, conectividad: 55 },
+    { nombre: "Monica Alexandra Rey Munevar", renovaciones: 67, calidad: 80, atrasos: 2.7, llamadas: 49, conectividad: 66 },
+    { nombre: "Maria Elena Vanegas Silguero", renovaciones: 71, calidad: 84, atrasos: 2.0, llamadas: 54, conectividad: 71 },
+    { nombre: "Yina Sanchez Roa", renovaciones: 64, calidad: 78, atrasos: 3.3, llamadas: 47, conectividad: 63 },
+    { nombre: "Manuel David Casas Orjuela", renovaciones: 69, calidad: 82, atrasos: 2.4, llamadas: 51, conectividad: 68 },
+    { nombre: "Juan David Perez Moreno", renovaciones: 62, calidad: 75, atrasos: 3.9, llamadas: 43, conectividad: 59 },
+    { nombre: "Angelica Natalia Rodriguez Prieto", renovaciones: 73, calidad: 87, atrasos: 1.6, llamadas: 56, conectividad: 74 },
+    { nombre: "Jessica Tatiana Valderrama Roa", renovaciones: 60, calidad: 79, atrasos: 3.1, llamadas: 45, conectividad: 61 },
+    { nombre: "Daniela Ramirez Pacheco", renovaciones: 66, calidad: 81, atrasos: 2.6, llamadas: 50, conectividad: 67 },
+    { nombre: "John Erick Jaramillo Correa", renovaciones: 57, calidad: 73, atrasos: 4.3, llamadas: 41, conectividad: 56 },
+    { nombre: "Karolina Arboleda Rios", renovaciones: 74, calidad: 85, atrasos: 1.9, llamadas: 57, conectividad: 73 },
+    { nombre: "Alisson Mora Benavidez", renovaciones: 65, calidad: 80, atrasos: 2.8, llamadas: 48, conectividad: 65 },
+    { nombre: "Paula Andrea Gomez Bernal", renovaciones: 70, calidad: 83, atrasos: 2.2, llamadas: 52, conectividad: 69 },
+    { nombre: "Leidy Juliana Santander Roa", renovaciones: 63, calidad: 77, atrasos: 3.4, llamadas: 46, conectividad: 62 }
+  ];
+
+  const meta = 100;
+  const totalRenovaciones = gestores.reduce((sum, g) => sum + g.renovaciones, 0);
+  const promedioCalidad = (gestores.reduce((sum, g) => sum + g.calidad, 0) / gestores.length).toFixed(1);
+  const promedioAtrasos = (gestores.reduce((sum, g) => sum + g.atrasos, 0) / gestores.length).toFixed(2);
+  const promedioLlamadas = Math.round(gestores.reduce((sum, g) => sum + g.llamadas, 0) / gestores.length);
+  
+  // Top performers
+  const mejorRenovaciones = [...gestores].sort((a, b) => b.renovaciones - a.renovaciones)[0];
+  const mejorCalidad = [...gestores].sort((a, b) => b.calidad - a.calidad)[0];
+  const mejorProductividad = [...gestores].sort((a, b) => b.llamadas - a.llamadas)[0];
+
+  const CircularProgress = ({ value, max, label, color }) => {
+    const percentage = (value / max) * 100;
+    const circumference = 2 * Math.PI * 45;
+    const strokeDashoffset = circumference - (percentage / 100) * circumference;
+    
+    return (
+      <div className="flex flex-col items-center">
+        <div className="relative w-32 h-32">
+          <svg className="transform -rotate-90 w-32 h-32">
+            <circle cx="64" cy="64" r="45" stroke="#e5e7eb" strokeWidth="8" fill="none" />
+            <circle 
+              cx="64" cy="64" r="45" 
+              stroke={color} 
+              strokeWidth="8" 
+              fill="none"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              className="transition-all duration-1000"
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-2xl font-bold text-gray-800">{value}</span>
+            <span className="text-xs text-gray-500">{percentage.toFixed(1)}%</span>
+          </div>
+        </div>
+        <p className="text-sm font-medium text-gray-700 mt-2">{label}</p>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-pink-50 p-6">
+      {/* Header con degradado */}
+      <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 rounded-2xl shadow-2xl p-6 mb-6 text-white">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">Dashboard Renovaciones</h1>
+            <p className="text-purple-100">Análisis en Tiempo Real</p>
+          </div>
+          <div className="text-right bg-white/10 backdrop-blur-sm rounded-xl p-4">
+            <div className="text-3xl font-bold">{currentTime.toLocaleTimeString('es-CO')}</div>
+            <div className="text-sm text-purple-100">Actualización cada 30 min</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Sección Superior - KPIs Principales */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* KPIs Circulares */}
+        <div className="bg-white rounded-2xl shadow-xl p-6">
+          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <Target className="w-5 h-5 text-purple-600" />
+            Totales Por Canal
+          </h3>
+          <div className="grid grid-cols-3 gap-4">
+            <CircularProgress value={totalRenovaciones} max={2300} label="Total" color="#9333ea" />
+            <CircularProgress value={mejorRenovaciones.renovaciones} max={100} label="Efectivo" color="#3b82f6" />
+            <CircularProgress value={mejorCalidad.calidad} max={100} label="Calidad" color="#10b981" />
+          </div>
+        </div>
+
+        {/* Mejor Gestor del Mes */}
+        <div className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl shadow-xl p-6 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-4">
+              <Star className="w-6 h-6" />
+              <h3 className="text-xl font-bold">Mejor Gestor del Mes</h3>
+            </div>
+            <div className="bg-white rounded-xl p-4 text-center">
+              <div className="w-24 h-24 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full mx-auto mb-3 flex items-center justify-center text-white text-3xl font-bold">
+                {mejorRenovaciones.nombre.split(' ').map(n => n[0]).slice(0, 2).join('')}
+              </div>
+              <h4 className="font-bold text-gray-800 text-lg">{mejorRenovaciones.nombre}</h4>
+              <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                <div className="bg-purple-50 rounded-lg p-2">
+                  <div className="font-bold text-purple-600">{mejorRenovaciones.renovaciones}</div>
+                  <div className="text-gray-600 text-xs">Renovaciones</div>
+                </div>
+                <div className="bg-green-50 rounded-lg p-2">
+                  <div className="font-bold text-green-600">{mejorRenovaciones.calidad}%</div>
+                  <div className="text-gray-600 text-xs">Calidad</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Resumen Rápido */}
+        <div className="bg-white rounded-2xl shadow-xl p-6">
+          <h3 className="text-lg font-bold text-gray-800 mb-4">Resumen del Equipo</h3>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <Users className="w-8 h-8 text-purple-600" />
+                <div>
+                  <div className="text-2xl font-bold text-purple-600">{gestores.length}</div>
+                  <div className="text-sm text-gray-600">Gestores</div>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <Award className="w-8 h-8 text-green-600" />
+                <div>
+                  <div className="text-2xl font-bold text-green-600">{promedioCalidad}%</div>
+                  <div className="text-sm text-gray-600">Calidad Promedio</div>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <Phone className="w-8 h-8 text-blue-600" />
+                <div>
+                  <div className="text-2xl font-bold text-blue-600">{promedioLlamadas}</div>
+                  <div className="text-sm text-gray-600">Llamadas/día</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Sección de Métricas Detalladas */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* 1. RENOVACIONES */}
+        <div className="bg-white rounded-2xl shadow-xl p-6">
+          <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-purple-500">
+            <Target className="w-6 h-6 text-purple-600" />
+            <h3 className="text-xl font-bold text-gray-800">Renovaciones vs Meta</h3>
+          </div>
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {gestores.sort((a, b) => b.renovaciones - a.renovaciones).slice(0, 10).map((gestor, idx) => {
+              const porcentaje = (gestor.renovaciones / meta) * 100;
+              return (
+                <div key={idx} className="p-3 hover:bg-purple-50 rounded-lg transition-colors">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-700 flex-1">{gestor.nombre}</span>
+                    <span className="text-sm font-bold text-purple-600 ml-2">{gestor.renovaciones}/100</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full transition-all ${
+                          porcentaje >= 100 ? 'bg-green-500' : 
+                          porcentaje >= 80 ? 'bg-yellow-500' : 'bg-red-500'
+                        }`}
+                        style={{ width: `${Math.min(porcentaje, 100)}%` }}
+                      ></div>
+                    </div>
+                    <span className="text-xs font-semibold text-gray-600 w-12 text-right">{porcentaje.toFixed(0)}%</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 2. CALIDAD */}
+        <div className="bg-white rounded-2xl shadow-xl p-6">
+          <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-green-500">
+            <Award className="w-6 h-6 text-green-600" />
+            <h3 className="text-xl font-bold text-gray-800">Score de Calidad</h3>
+          </div>
+          <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg mb-4">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-gray-700">Promedio del Equipo</span>
+              <span className="text-3xl font-bold text-green-600">{promedioCalidad}%</span>
+            </div>
+          </div>
+          <div className="space-y-2 max-h-80 overflow-y-auto">
+            {gestores.sort((a, b) => b.calidad - a.calidad).slice(0, 10).map((gestor, idx) => (
+              <div key={idx} className="flex items-center justify-between p-3 hover:bg-green-50 rounded-lg transition-colors">
+                <span className="text-sm font-medium text-gray-700">{gestor.nombre}</span>
+                <span className={`px-3 py-1 rounded-full text-sm font-bold ${
+                  gestor.calidad >= 80 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                }`}>
+                  {gestor.calidad}%
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Sección Inferior */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* 3. ATRASOS */}
+        <div className="bg-white rounded-2xl shadow-xl p-6">
+          <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-orange-500">
+            <Clock className="w-6 h-6 text-orange-600" />
+            <h3 className="text-xl font-bold text-gray-800">Seguimientos Atrasados</h3>
+          </div>
+          <div className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-lg mb-4">
+            <div className="flex items-center justify-between">
+              <span className="font-semibold text-gray-700">Promedio del Equipo</span>
+              <span className="text-3xl font-bold text-orange-600">{promedioAtrasos}%</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {gestores.sort((a, b) => a.atrasos - b.atrasos).slice(0, 8).map((gestor, idx) => (
+              <div key={idx} className="p-3 bg-gray-50 rounded-lg hover:bg-orange-50 transition-colors">
+                <div className="text-xs text-gray-600 mb-1 truncate">{gestor.nombre.split(' ')[0]} {gestor.nombre.split(' ')[2]}</div>
+                <div className={`text-lg font-bold ${gestor.atrasos <= 2 ? 'text-green-600' : 'text-red-600'}`}>
+                  {gestor.atrasos}%
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 4. PRODUCTIVIDAD */}
+        <div className="bg-white rounded-2xl shadow-xl p-6">
+          <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-blue-500">
+            <Phone className="w-6 h-6 text-blue-600" />
+            <h3 className="text-xl font-bold text-gray-800">Productividad</h3>
+          </div>
+          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <span className="text-sm text-gray-600">Promedio Llamadas</span>
+                <div className="text-3xl font-bold text-blue-600">{promedioLlamadas}</div>
+              </div>
+              <div>
+                <span className="text-sm text-gray-600">Meta Diaria</span>
+                <div className="text-3xl font-bold text-gray-400">45+</div>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {gestores.sort((a, b) => b.llamadas - a.llamadas).slice(0, 8).map((gestor, idx) => (
+              <div key={idx} className="flex items-center justify-between p-3 hover:bg-blue-50 rounded-lg transition-colors">
+                <span className="text-sm font-medium text-gray-700 flex-1 truncate">{gestor.nombre}</span>
+                <div className="flex items-center gap-2">
+                  <span className={`px-3 py-1 rounded-full text-sm font-bold ${
+                    gestor.llamadas >= 45 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  }`}>
+                    {gestor.llamadas}
+                  </span>
+                  <span className="text-xs text-gray-500">{gestor.conectividad}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DashboardRenovaciones;
