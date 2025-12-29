@@ -10,7 +10,9 @@ import {
   Star,
   Activity,
   Calendar,
-  MoreHorizontal
+  Download,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -26,12 +28,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface Gestor {
   nombre: string;
@@ -78,11 +74,25 @@ const CircularProgress = ({ value, max, label, color, sublabel }: { value: numbe
 
 export default function Dashboard() {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [showAllGestores, setShowAllGestores] = useState(false);
   
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
+
+  const handleExport = () => {
+    const csv = [
+      ['Gestor', 'Renovaciones', 'Calidad', 'Atrasos', 'Llamadas'].join(','),
+      ...gestores.map(g => [g.nombre, g.renovaciones, g.calidad, g.atrasos, g.llamadas].join(','))
+    ].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `renovaciones-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+  };
 
   const gestores: Gestor[] = [
     { nombre: "Monica Andrea Perez Pardo", renovaciones: 195, calidad: 84, atrasos: 1.2, llamadas: 52, conectividad: 68 },
@@ -156,16 +166,56 @@ export default function Dashboard() {
             <p className="text-muted-foreground mt-1">KPIs: 180+ renovaciones/mes | Calidad {'>'}80% | Atrasos ≤2% | 100% cumplimiento</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm">
-              <Calendar className="mr-2 h-4 w-4" />
-              Este Mes
-            </Button>
-            <Button size="sm">
-              <TrendingUp className="mr-2 h-4 w-4" />
-              Ver Reporte
+            <Button variant="outline" size="sm" onClick={handleExport} data-testid="button-export">
+              <Download className="mr-2 h-4 w-4" />
+              Descargar CSV
             </Button>
           </div>
         </div>
+
+        {/* Estrategia para Alcanzar Meta */}
+        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Target className="w-5 h-5 text-blue-600" />
+              Estrategia: Cómo Alcanzar la Meta con 23 Gestores
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="flex gap-4">
+                <div className="flex-shrink-0">
+                  <CheckCircle className="w-6 h-6 text-green-600 mt-1" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground mb-1">Meta Total</h4>
+                  <p className="text-sm text-muted-foreground">23 gestores × 180 renovaciones = <strong>4,140 renovaciones/mes</strong></p>
+                  <p className="text-xs text-muted-foreground mt-2">↓ 138 renovaciones/día (promedio)</p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-shrink-0">
+                  <CheckCircle className="w-6 h-6 text-green-600 mt-1" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground mb-1">Distribución Realista</h4>
+                  <p className="text-sm text-muted-foreground">Equipo está <strong>+11.2% por encima</strong> de meta (4,340 renovaciones gestionadas)</p>
+                  <p className="text-xs text-muted-foreground mt-2">8 gestores superan meta en +15%</p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-shrink-0">
+                  <CheckCircle className="w-6 h-6 text-green-600 mt-1" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-foreground mb-1">Indicadores Cumplidos</h4>
+                  <p className="text-sm text-muted-foreground"><strong>✓</strong> Calidad: {promedioCalidad}% (meta: 80%)</p>
+                  <p className="text-sm text-muted-foreground"><strong>✓</strong> Atrasos: {promedioAtrasos}% (límite: 2%)</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Top Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -284,8 +334,8 @@ export default function Dashboard() {
                 <CardTitle>Rendimiento por Gestor</CardTitle>
                 <CardDescription>Detalle de métricas individuales ordenado por renovaciones.</CardDescription>
               </div>
-              <Button variant="outline" size="sm" className="hidden sm:flex">
-                <TrendingUp className="mr-2 h-4 w-4" /> Exportar
+              <Button variant="outline" size="sm" onClick={handleExport} data-testid="button-export-table">
+                <Download className="mr-2 h-4 w-4" /> Exportar
               </Button>
             </CardHeader>
             <CardContent>
@@ -297,14 +347,13 @@ export default function Dashboard() {
                       <TableHead className="text-center">Renovaciones</TableHead>
                       <TableHead className="text-center">Progreso</TableHead>
                       <TableHead className="text-center">Calidad</TableHead>
-                      <TableHead className="text-right">Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sortedByRenovaciones.slice(0, 10).map((gestor, i) => {
+                    {sortedByRenovaciones.slice(0, showAllGestores ? undefined : 10).map((gestor, i) => {
                        const porcentaje = (gestor.renovaciones / meta) * 100;
                        return (
-                        <TableRow key={i}>
+                        <TableRow key={i} data-testid={`row-gestor-${i}`}>
                           <TableCell className="font-medium">
                             <div className="flex items-center gap-3">
                               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
@@ -313,7 +362,7 @@ export default function Dashboard() {
                               <span className="truncate max-w-[180px]" title={gestor.nombre}>{gestor.nombre}</span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-center font-bold text-base">{gestor.renovaciones}</TableCell>
+                          <TableCell className="text-center font-bold text-base" data-testid={`text-renovaciones-${i}`}>{gestor.renovaciones}</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2 justify-center">
                               <Progress 
@@ -332,21 +381,6 @@ export default function Dashboard() {
                               {gestor.calidad}%
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                  <span className="sr-only">Open menu</span>
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem>Ver perfil</DropdownMenuItem>
-                                <DropdownMenuItem>Detalles de llamadas</DropdownMenuItem>
-                                <DropdownMenuItem>Historial</DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
                         </TableRow>
                        );
                     })}
@@ -354,7 +388,15 @@ export default function Dashboard() {
                 </Table>
               </div>
               <div className="mt-4 flex justify-center">
-                <Button variant="ghost" size="sm" className="text-muted-foreground">Ver todos los gestores</Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-muted-foreground hover:text-foreground"
+                  onClick={() => setShowAllGestores(!showAllGestores)}
+                  data-testid="button-toggle-all-gestores"
+                >
+                  {showAllGestores ? '↑ Ver Top 10' : '↓ Ver todos los gestores'}
+                </Button>
               </div>
             </CardContent>
           </Card>
