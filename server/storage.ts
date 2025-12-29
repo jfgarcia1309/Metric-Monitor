@@ -48,6 +48,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.managers.values()).filter(m => m.semana === week);
   }
 
+  async getManagersByWeek(week: number): Promise<Manager[]> {
+    return Array.from(this.managers.values()).filter(m => m.semana === week);
+  }
+
   async createManager(insertManager: InsertManager): Promise<Manager> {
     const id = randomUUID();
     const manager: Manager = { ...insertManager, id };

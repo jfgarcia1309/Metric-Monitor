@@ -367,7 +367,7 @@ export default function AdminPanel() {
         {/* Tabla Editable */}
         <Card>
           <CardHeader>
-            <CardTitle>Lista de Gestores ({gestores.length})</CardTitle>
+            <CardTitle>Lista de Gestores ({managers.length})</CardTitle>
             <CardDescription>Edita los datos directamente o importa desde CSV</CardDescription>
           </CardHeader>
           <CardContent>
@@ -383,10 +383,10 @@ export default function AdminPanel() {
                     <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {managers.map((gestor, idx) => (
-                    <TableRow key={gestor.id}>
-                      {editingIndex === idx && editValues ? (
+            <TableBody>
+              {managers.map((gestor, idx) => (
+                <TableRow key={gestor.id}>
+                  {editingIndex === idx && editValues ? (
                         <>
                           <TableCell>
                             <Input
@@ -513,7 +513,7 @@ export default function AdminPanel() {
                 Juan Gomez,188,82,1.5,48
               </p>
               <p className="text-xs text-muted-foreground mt-3">
-                💾 Los cambios se guardan en tu navegador. <strong>Esos datos aparecen en el dashboard</strong> cuando regreses a la página principal.
+                💾 Los datos se guardan en el servidor y aparecen en el dashboard.
               </p>
             </CardContent>
           </Card>
