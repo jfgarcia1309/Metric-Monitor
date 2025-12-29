@@ -494,14 +494,12 @@ export default function Dashboard() {
 
           {/* Side Widgets */}
           <div className="space-y-6">
-            {/* Gestor de la Semana / Gestor del Mes */}
-            <Card className={`border-0 shadow-lg ${currentWeek === 4 ? 'bg-gradient-to-br from-purple-50 to-indigo-50' : 'bg-gradient-to-br from-amber-50 to-yellow-50'}`}>
+            {/* Gestor de la Semana */}
+            <Card className="border-0 shadow-lg bg-gradient-to-br from-amber-50 to-yellow-50">
               <CardContent className="p-6">
                 <div className="text-center">
-                  <div className="text-5xl mb-3">🏆</div>
-                  <h3 className="font-bold text-lg mb-1">
-                    {currentWeek === 4 ? '🌟 Gestor del Mes' : `⭐ Gestor de la Semana S${currentWeek}`}
-                  </h3>
+                  <div className="text-5xl mb-3">⭐</div>
+                  <h3 className="font-bold text-lg mb-1">Gestor de la Semana S{currentWeek}</h3>
                   <p className="text-2xl font-bold text-primary mb-2">{mejorRenovaciones.nombre}</p>
                   <div className="bg-white/60 rounded-lg p-3 space-y-1">
                     <p className="text-sm text-muted-foreground">Renovaciones</p>
@@ -511,6 +509,24 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Gestor del Mes - Solo aparece en S4 */}
+            {currentWeek === 4 && (
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-indigo-50">
+                <CardContent className="p-6">
+                  <div className="text-center">
+                    <div className="text-5xl mb-3">🌟</div>
+                    <h3 className="font-bold text-lg mb-1">Gestor del Mes</h3>
+                    <p className="text-2xl font-bold text-primary mb-2">{getMonthlyTopGestor().nombre}</p>
+                    <div className="bg-white/60 rounded-lg p-3 space-y-1">
+                      <p className="text-sm text-muted-foreground">Renovaciones (Promedio)</p>
+                      <p className="text-3xl font-bold">{getMonthlyTopGestor().renovaciones}</p>
+                      <p className="text-xs text-green-600 font-semibold">+{Math.round((getMonthlyTopGestor().renovaciones / 180 - 1) * 100)}% vs Meta</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <Card className="border-none shadow-md">
               <CardHeader>
