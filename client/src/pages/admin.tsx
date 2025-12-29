@@ -24,7 +24,6 @@ export default function AdminPanel() {
   const [currentWeek, setCurrentWeek] = useState(4);
   const [, navigate] = useLocation();
 
-  const [gestoresList, setGestoresList] = useState<any[]>([]);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editValues, setEditValues] = useState<any | null>(null);
 

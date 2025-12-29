@@ -103,11 +103,12 @@ export default function Dashboard() {
   const gestores = managers;
 
   const meta = 180;
-  const totalRenovaciones = gestores.reduce((sum: number, g: Manager) => sum + g.renovaciones, 0);
+  const standardGestores = 23;
+  const totalRenovaciones = gestores.length > 0 ? gestores.reduce((sum: number, g: Manager) => sum + g.renovaciones, 0) : 0;
   const promedioCalidad = gestores.length > 0 ? (gestores.reduce((sum: number, g: Manager) => sum + g.calidad, 0) / gestores.length).toFixed(1) : "0";
   const promedioAtrasos = gestores.length > 0 ? (gestores.reduce((sum: number, g: Manager) => sum + g.atrasos, 0) / gestores.length).toFixed(2) : "0";
   const promedioLlamadas = gestores.length > 0 ? Math.round(gestores.reduce((sum: number, g: Manager) => sum + g.llamadas, 0) / gestores.length) : 0;
-  const metaTotal = meta * (gestores.length || 23);
+  const metaTotal = meta * (gestores.length || standardGestores);
   
   // Top performers
   const sortedByRenovaciones = [...gestores].sort((a, b) => b.renovaciones - a.renovaciones);
@@ -241,7 +242,7 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Target className="w-5 h-5 text-blue-600" />
-              Estrategia: Cómo Alcanzar la Meta con 23 Gestores
+              Estrategia: Cómo Alcanzar la Meta con {gestores.length || 23} Gestores
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -252,8 +253,8 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <h4 className="font-semibold text-foreground mb-1">Meta Total</h4>
-                  <p className="text-sm text-muted-foreground">23 gestores × 180 renovaciones = <strong>4,140 renovaciones/mes</strong></p>
-                  <p className="text-xs text-muted-foreground mt-2">↓ 138 renovaciones/día (promedio)</p>
+                  <p className="text-sm text-muted-foreground">{gestores.length || 23} gestores × 180 renovaciones = <strong>{metaTotal.toLocaleString()} renovaciones/mes</strong></p>
+                  <p className="text-xs text-muted-foreground mt-2">↓ {(metaTotal / 30).toFixed(0)} renovaciones/día (promedio equipo)</p>
                 </div>
               </div>
               <div className="flex gap-4">
@@ -262,8 +263,12 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <h4 className="font-semibold text-foreground mb-1">Distribución Realista</h4>
-                  <p className="text-sm text-muted-foreground">Equipo está <strong>+11.2% por encima</strong> de meta (4,340 renovaciones gestionadas)</p>
-                  <p className="text-xs text-muted-foreground mt-2">8 gestores superan meta en +15%</p>
+                  <p className="text-sm text-muted-foreground">
+                    Equipo está <strong>{totalRenovaciones >= metaTotal ? '+' : ''}{((totalRenovaciones / (metaTotal || 1) - 1) * 100).toFixed(1)}%</strong> {totalRenovaciones >= metaTotal ? 'por encima' : 'por debajo'} de meta ({totalRenovaciones.toLocaleString()} renovaciones)
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {gestores.filter(g => g.renovaciones >= 180 * 1.15).length} gestores superan meta en +15%
+                  </p>
                 </div>
               </div>
               <div className="flex gap-4">
